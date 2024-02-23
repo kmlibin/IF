@@ -2,7 +2,25 @@ import React from "react";
 import Image from "next/image";
 import quilt from "../../../public/quilt.jpg";
 import Link from "next/link";
-import { getProducts } from "../actions";
+
+
+import { collection, getDocs } from "firebase/firestore/lite";
+import { db } from "@/app/firebase/config";
+
+interface Product {
+    name: string;
+    type: string;
+    price: number;
+  }
+
+export async function getProducts() {
+    const productCol = collection(db, "products");
+    const productSnapshot = await getDocs(productCol);
+    const productsList: Product[] = productSnapshot.docs.map(
+      (doc) => doc.data() as Product
+    );
+    return productsList
+}
 
 
 export default async function ProductList() {
