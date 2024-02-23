@@ -16,9 +16,10 @@ interface Product {
 export async function getProducts() {
     const productCol = collection(db, "products");
     const productSnapshot = await getDocs(productCol);
-    const productsList: Product[] = productSnapshot.docs.map(
-      (doc) => doc.data() as Product
+    const productsList: { id: string; data: Product }[] = productSnapshot.docs.map(
+      (doc) => ({ id: doc.id, data: doc.data() as Product })
     );
+    console.log(productsList)
     return productsList
 }
 
@@ -26,17 +27,18 @@ export async function getProducts() {
 export default async function ProductList() {
   const products = await getProducts();
 
+  console.log(products)
   return (
     <div className="flex w-full gap-4 justify-center items-center min-h-[70vh]">
       {products &&
-        products.map((item: any) => (
-          <div key={item.price} className="w-1/4 flex flex-col">
+        products.map((item: { id: string; data: Product }) => (
+          <div key={item.data.name} className="w-1/4 flex flex-col">
             <Image src={quilt} alt="quilt" />
             <Link href={`/products/${item.id}`}>
-              <div>{item.name}</div>
+              <div>{item.data.name}</div>
             </Link>
-            <div>{item.type}</div>
-            <div>{item.price}</div>
+            <div>{item.data.type}</div>
+            <div>{item.data.price}</div>
           </div>
         ))}
     </div>
