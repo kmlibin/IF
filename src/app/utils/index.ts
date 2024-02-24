@@ -1,18 +1,35 @@
-import { collection, getDocs } from "firebase/firestore/lite";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore/lite";
 import { db } from "@/app/firebase/config";
 
 interface Product {
-    name: string;
-    type: string;
-    price: number;
+  name: string;
+  type: string;
+  price: number;
+}
+
+//need to put these in try/catches
+
+export async function getProducts() {
+  const productCol = collection(db, "products");
+  const productSnapshot = await getDocs(productCol);
+  const productsList: { id: string; data: Product }[] =
+    productSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      data: doc.data() as Product,
+    }));
+  console.log(productsList);
+  return productsList;
+}
+
+export async function getProductById(id: string): Promise<{ id: string; data: Product | undefined }> {
+  console.log(`in call ${id}`);
+  const productRef = doc(db, "products", id);
+  const productSnapshot = await getDoc(productRef);
+  if (productSnapshot) {
+    const productData = productSnapshot.data() as Product;
+    console.log(productData);
+    return { id: productSnapshot.id, data: productData };
   }
 
- export async function getProducts() {
-    const productCol = collection(db, "products");
-    const productSnapshot = await getDocs(productCol);
-    const productsList: { id: string; data: Product }[] = productSnapshot.docs.map(
-      (doc) => ({ id: doc.id, data: doc.data() as Product })
-    );
-    console.log(productsList)
-    return productsList
+  return { id: '', data: undefined }
 }
