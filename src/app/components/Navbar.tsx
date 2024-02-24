@@ -16,6 +16,9 @@ export default function Navbar()  {
           <Link href="/products">{item}</Link>
         </li>
       ))}
+      <li className="">
+          <Link href="/cart">Cart</Link>
+        </li>
     </ul>
     </nav>
   )
