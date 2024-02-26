@@ -19,41 +19,25 @@ interface ProductProps {
 }
 
 export default function Product({ product }: ProductProps) {
-  const [cart, setCart] = useCart();
+  const { state, dispatch } = useCart();
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
   // const [cart, setCart] = useState<any>(null);
   console.log(product);
 
-
-  //make sure the structures match to the cart context!
   const addToCart = () => {
-    setCart((prevCart) => {
-      if (!prevCart) {
-        return [{ id: product.id, data: product.data }];
-      } else {
-        return [...prevCart, { id: product.id, data: product.data }];
-      }
-    });
-  };
-  const removeFromCart = () => {
-    setCart((prevCart) => {
-      if (!prevCart) {
-        return [];
-      } else {
-        return prevCart.filter((item) => item.id !== product.id);
-      }
-    });
+    dispatch({ type: "ADD_TO_CART", payload: { id: product.id, data: product.data } });
   };
 
-  console.log(cart);
+  const removeFromCart = () => {
+    dispatch({ type: "REMOVE_FROM_CART", payload: product.id });
+  };
+
+  console.log(state);
 
   return (
     <div>
-      {loading && <p>Loading...</p>}
-      {error && <p>Error fetching product data.</p>}
+
       {product && (
         <>
           <div>

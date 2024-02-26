@@ -3,11 +3,11 @@
 import React, {
   createContext,
   useState,
-  Dispatch,
-  SetStateAction,
+  useContext,
+  useReducer,
 } from "react";
 
-interface Cart {
+interface CartItem {
   id: string;
   data: {
     price: number | string;
@@ -17,35 +17,52 @@ interface Cart {
   };
 }
 
-//responsible for managing the state of the cart
-const useCartState = () => {
-  const [cart, setCart] = useState<Cart[]>([]);
-  return [cart, setCart] as const;
+type Action =
+  | { type: "ADD_TO_CART"; payload: CartItem }
+  | { type: "REMOVE_FROM_CART"; payload: string }; // assuming payload is the ID of the item to remove
+
+interface CartState {
+  cart: CartItem[];
+}
+
+const initialCartState: CartState = {
+  cart: [],
 };
 
-//creates the context
-export const CartContext = createContext<ReturnType<
-  typeof useCartState
-> | null>(null);
-
-
-//easy access to the cart in components
-export const useCart = () => {
-  const cart = React.useContext(CartContext);
-  if (!cart) {
-    throw new Error("useCart must be used within a cart provider");
+const cartReducer = (state: CartState, action: Action): CartState => {
+  switch (action.type) {
+    case "ADD_TO_CART":
+      return {
+        ...state,
+        cart: [...state.cart, action.payload],
+      };
+    case "REMOVE_FROM_CART":
+      return {
+        ...state,
+        cart: state.cart.filter((item) => item.id !== action.payload),
+      };
+    default:
+      return state;
   }
-  return cart;
 };
 
-//provider to wrap components
+export const CartContext = createContext<{
+  state: CartState;
+  dispatch: React.Dispatch<Action>;
+}>({
+  state: initialCartState,
+  dispatch: () => null,
+});
+
+export const useCart = () => {
+  return useContext(CartContext);
+};
+
 const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [cart, setCart] = useState<Cart[]>([]);
+  const [state, dispatch] = useReducer(cartReducer, initialCartState);
 
   return (
-    <CartContext.Provider
-      value={[cart, setCart] as [Cart[], Dispatch<SetStateAction<Cart[]>>]}
-    >
+    <CartContext.Provider value={{ state, dispatch }}>
       {children}
     </CartContext.Provider>
   );

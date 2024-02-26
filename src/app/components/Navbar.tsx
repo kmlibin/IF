@@ -6,8 +6,9 @@ import React from "react";
 import { useCart } from "./CartContext";
 
 export default function Navbar() {
-  const [cart] = useCart();
-  console.log(cart)
+  const {state} = useCart();
+  const {cart} = state
+
   return (
     <nav className="flex justify-evenly items-center">
       <div className="w-1/6">
