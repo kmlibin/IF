@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import quilt from "../../../../public/quilt.jpg";
+import { useCart } from "@/app/components/CartContext";
 
 interface ProductData {
   id: string;
@@ -18,27 +19,33 @@ interface ProductProps {
 }
 
 export default function Product({ product }: ProductProps) {
-  console.log(product);
+  const [cart, setCart] = useCart();
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const [cart, setCart] = useState<any>(null);
+  // const [cart, setCart] = useState<any>(null);
+  console.log(product);
 
-  const addToCart = (productData: ProductProps) => {
-    //need to check if prev exists, because if it doesn't it throws an error because it isn't iterable.
-    setCart((prev: ProductProps[] | null) => {
-      if (!prev) {
-        return [productData];
+
+  //make sure the structures match to the cart context!
+  const addToCart = () => {
+    setCart((prevCart) => {
+      if (!prevCart) {
+        return [{ id: product.id, data: product.data }];
       } else {
-        return [...prev, productData];
+        return [...prevCart, { id: product.id, data: product.data }];
       }
     });
   };
-
-  const removeFromCart = (productData: ProductProps) => {
-    setCart((prev: ProductProps[]) =>
-      prev.filter((item) => item.product.id !== productData.product.id)
-    );
+  const removeFromCart = () => {
+    setCart((prevCart) => {
+      if (!prevCart) {
+        return [];
+      } else {
+        return prevCart.filter((item) => item.id !== product.id);
+      }
+    });
   };
 
   console.log(cart);
@@ -53,11 +60,8 @@ export default function Product({ product }: ProductProps) {
             <Image src={quilt} alt="quilt" height={200} width={200} />
             <p>{product.data.name}</p>
             <p>{product.data.price}</p>
-            <button onClick={() => addToCart({ product })}>Add to Cart</button>
-            <br></br>
-            <button onClick={() => removeFromCart({ product })}>
-              Remove From Cart
-            </button>
+            <button onClick={addToCart}>Add to Cart</button>
+            <button onClick={removeFromCart}>Remove From Cart</button>
           </div>
         </>
       )}

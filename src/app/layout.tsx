@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import  Navbar  from "./components/Navbar";
+import Navbar from "./components/Navbar";
 import "./globals.css";
+import CartProvider from "./components/CartContext";
+import Cart from "./cart/page";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,10 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex flex-col">
-        <Navbar />
-        {children}
-        
-        </body>
+        <CartProvider>
+          <Navbar />
+          {children}
+        </CartProvider>
+      </body>
     </html>
   );
 }
