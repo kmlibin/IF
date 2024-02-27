@@ -70,6 +70,8 @@ export const useCart = () => {
 //provider to wrap components
 const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(cartReducer, initialCartState);
+
+  //check for local storage to set local state
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
     if (storedCart) {
