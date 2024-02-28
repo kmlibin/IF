@@ -32,7 +32,7 @@ export async function createOrder() {
     //if response isn't created (201)
     if (response.statusCode !== 201) {
       console.log("RES: ", response);
-      return { error: "true" };
+      return { error: response.statusMessage};
     }
 
     // Your Custom Code for doing something with order
