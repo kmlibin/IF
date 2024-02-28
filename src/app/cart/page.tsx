@@ -6,9 +6,9 @@ import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { createOrder, payOrder } from "../actions";
 
 export default function Cart() {
+  const client = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
   const initialOptions = {
-    clientId:
-      "AbkPZ_JQfrQGVrKfiyE6aCQZAAtTcHzCua3402ZKTmoKe5tX4vresISsznS9YnyJj-S416vq_v_JzN84",
+    clientId: client,
     currency: "USD",
     intent: "capture",
   };
