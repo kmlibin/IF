@@ -1,9 +1,7 @@
 "use client";
 
-import CartPay from "./CartPay";
 import Product from "../products/[id]/Product";
 import { useCart } from "../components/CartContext";
-import { useEffect, useState } from "react";
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { createOrder, payOrder } from "../actions";
 
