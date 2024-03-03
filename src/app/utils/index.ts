@@ -17,17 +17,17 @@ export async function getProducts() {
       id: doc.id,
       data: doc.data() as Product,
     }));
-  console.log(productsList);
+  // console.log(productsList);
   return productsList;
 }
 
 export async function getProductById(id: string): Promise<{ id: string; data: Product | undefined }> {
-  console.log(`in call ${id}`);
+  // console.log(`in call ${id}`);
   const productRef = doc(db, "products", id);
   const productSnapshot = await getDoc(productRef);
   if (productSnapshot) {
     const productData = productSnapshot.data() as Product;
-    console.log(productData);
+    // console.log(productData);
     return { id: productSnapshot.id, data: productData };
   }
 

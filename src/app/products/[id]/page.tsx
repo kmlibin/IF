@@ -27,7 +27,7 @@ export default async function ProductPage(props: ProductPageProps) {
 
 
   
-  console.log(productData)
+  // console.log(productData)
   return (
     <Product product={productData as ProductData} />
   )

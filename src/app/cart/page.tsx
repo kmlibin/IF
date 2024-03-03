@@ -4,10 +4,11 @@ import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { createOrder, payOrder } from "../actions";
 import CartPay from "./CartPay";
 
+
 export default function Cart() {
     //maybe put this on server and pass as a prop?
-  const client = process.env.PAYPAL_CLIENT_ID || "";
-  console.log(client) //logs on the server, not on the client
+  const client = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
+
 
   const initialOptions = {
     clientId: client,
@@ -15,24 +16,12 @@ export default function Cart() {
     intent: "capture",
   };
 
-  //   function createOrder(data, actions) {
-  //     return fetch("/api/createOrder", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         amount: YOUR_AMOUNT,
-  //         currency: YOUR_CURRENCY,
-  //       }),
-  //     })
-  //       .then((res) => res.json())
-  //       .then((data) => data.orderID);
-  //   }
-
 
   return (
-    <CartPay initialOptions={initialOptions}/>
+    <>
+    <CartPay />
+  
+    </>
     // <PayPalScriptProvider options={initialOptions}>
     //   <div>
     //     {cart.map((item) => (
