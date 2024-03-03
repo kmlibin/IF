@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "../components/CartContext";
 import Product from "../products/[id]/Product";
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
@@ -15,13 +15,27 @@ interface CartPayProps {
   };
 }
 
-const CartPay = ({ initialOptions }: CartPayProps) => {
+const CartPay = () => {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [validAddress, setValidAddress] = useState(false);
-
+const [cost, setCost] = useState("20")
   const { state } = useCart();
   const { cart } = state;
+
+
+  const client = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
+  const initialOptions = {
+    clientId: client,
+    currency: "USD",
+    intent: "capture",
+  };
+
+  console.log(initialOptions)
+
+  useEffect(() => {
+    console.log(address)
+  },[address])
 
   const handleAddressValidation = async () => {
     try {
@@ -76,7 +90,8 @@ const CartPay = ({ initialOptions }: CartPayProps) => {
         <div>
           <PayPalButtons
             createOrder={async (data, actions) => {
-              let response = await createOrder();
+        
+              let response = await createOrder(cost);
               if (response.success === "true") {
                 return response.orderId; //success
               } else {
@@ -85,8 +100,10 @@ const CartPay = ({ initialOptions }: CartPayProps) => {
                 return undefined; // undefined if createOrder failed
               }
             }}
-            onApprove={async (data, actions) => {
-              let response = await payOrder(data.orderID);
+            onApprove={async (data, actions) => {  
+              const products = {cart}
+              const shippingAddress = cost
+              let response = await payOrder(data.orderID, shippingAddress, products);
               if (response && response.success === "true") {
                 console.log("Payment successful");
               } else {

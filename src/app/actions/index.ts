@@ -1,9 +1,12 @@
 "use server";
 import client from "../utils/paypal/client";
 import paypal from "@paypal/checkout-server-sdk";
+import { collection, addDoc } from "firebase/firestore/lite";
+import { db } from "@/app/firebase/config";
 
 //responsible for initiating the creation of a paypal order
-export async function createOrder() {
+export async function createOrder(cost: any) {
+  
   try {
     //init paypal client
     const PaypalClient = client();
@@ -19,9 +22,20 @@ export async function createOrder() {
         {
           amount: {
             currency_code: "USD",
-            value: "10.00",
+            value: cost,
           },
-
+          // shipping: {
+          //   name: {
+          //     full_name: "john doe"
+          //   },
+          //   address: {
+          //     address_line_1: "address line 1 works",
+          //     admin_area_2: 'Phoenix',
+          //     admin_area_1: 'AZ',
+          //     postal_code: '85001',
+          //     country_code: 'US'
+          //   }
+          // }
         },
       ],
     });
@@ -32,11 +46,8 @@ export async function createOrder() {
     //if response isn't created (201)
     if (response.statusCode !== 201) {
       console.log("RES: ", response);
-      return { error: response.statusMessage};
+      return { error: response.statusMessage };
     }
-
-    // Your Custom Code for doing something with order
-    // Usually Store an order in the database like MongoDB
 
     //extract orderID from the response, then return it
     const orderId = response.result.id;
@@ -48,8 +59,29 @@ export async function createOrder() {
   }
 }
 
+async function postOrderToFirebase(orderObject: any) {
+  try {
+    // Reference to the 'orders' collection
+    const ordersCollection = collection(db, "orders");
+
+    // Add a new document to the 'orders' collection with the order object
+    const docRef = await addDoc(ordersCollection, orderObject);
+
+    console.log("Order successfully added with ID:", docRef.id);
+  } catch (error) {
+    console.error("Error adding order to Firebase:", error);
+    throw error; // Optional: Rethrow the error to handle it further up the call stack
+  }
+}
+
 //responsible for capturing the payment
-export async function payOrder(orderId: string) {
+export async function payOrder(
+  orderId: string,
+  shippingAddress: any,
+  products: any
+) {
+  console.log(shippingAddress)
+
   console.log("runs!");
   console.log(orderId);
   //initialize client again
@@ -65,9 +97,15 @@ export async function payOrder(orderId: string) {
     return { error: "true" };
   }
   console.log(response);
-  // Your Custom Code to Update Order Status
-  // And Other stuff that is related to that order, like wallet
-  // Here I am updateing the wallet and sending it back to frontend to update it on frontend
+
+  const orderObject = {
+    PaypalPaymentId: orderId,
+    PayPalemail: response.result.payer.email_address,
+    shippingAddress,
+    products,
+  };
+
+  await postOrderToFirebase(orderObject);
   console.log("success");
   return { success: "true" };
 }
