@@ -1,23 +1,34 @@
 "use client";
 import React, { useState, useEffect } from "react";
 
-type CollectInfoProps = {
-  setFinalAddress: (address: string) => void;
+type ContactInfo = {
+  name: string;
+  email: string;
+  address: string;
 };
 
-const CollectInfo = ({ setFinalAddress }: CollectInfoProps) => {
+type CollectInfoProps = {
+  contactInfo: ContactInfo;
+  setContactInfo: React.Dispatch<React.SetStateAction<ContactInfo>>;
+};
+
+const CollectInfo = ({
+  setContactInfo,
+  contactInfo,
+}: CollectInfoProps) => {
   const [name, setName] = useState("");
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [zip, setZip] = useState("");
+  const [email, setEmail] = useState("");
   const [userAddress, setUserAddress] = useState("");
   const [validatedAddress, setValidatedAddress] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState("");
 
   const handleAddressValidation = async () => {
     const cleanedAddress = userAddress.replace(/,/g, "");
-    console.log(`cleaned : ${cleanedAddress}`);
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
@@ -30,7 +41,6 @@ const CollectInfo = ({ setFinalAddress }: CollectInfoProps) => {
 
         if (data.results.length > 0) {
           setValidatedAddress(data.results[0].formatted_address);
-          console.log(`validated address: ${data}`);
         }
       } else {
         console.error("Error validating address:", response.statusText);
@@ -48,9 +58,21 @@ const CollectInfo = ({ setFinalAddress }: CollectInfoProps) => {
     });
   };
 
+  const handleSetAddress = () => {
+    if (selectedAddress) { 
+      setContactInfo({ name: name, email: email, address: selectedAddress });
+    } else {
+      setContactInfo({name: name, email: email, address: validatedAddress});
+    }
+  };
+
   useEffect(() => {
     handleAddressValidation();
-  }, [userAddress]);
+  }, [userAddress, validatedAddress, userAddress]);
+
+  useEffect(() => {
+    console.log(`contactInfo="${contactInfo.name} ${contactInfo.email} ${contactInfo.address}`);
+  }, [ contactInfo]);
 
   return (
     <div className="w-full bg-cyan-400">
@@ -63,6 +85,15 @@ const CollectInfo = ({ setFinalAddress }: CollectInfoProps) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
+          />
+        </div>
+        <div className="bg-red-200">
+          <label htmlFor="email">email:</label>
+          <input
+            type="text"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div className="bg-red-200">
@@ -121,19 +152,38 @@ const CollectInfo = ({ setFinalAddress }: CollectInfoProps) => {
       {validatedAddress && (
         <div className="w-full flex">
           <div className="flex flex-col w-1/2">
-            <p>Address you entered:</p>
-            <p>
-              {name} {userAddress}
-            </p>
+            <input
+              type="radio"
+              id="userAddress"
+              name="addressType"
+              value={userAddress}
+              onChange={() => setSelectedAddress(userAddress)}
+            />
+            <label htmlFor="userAddress">Address you entered:</label>
+            <p>{userAddress}</p>
           </div>
           <div className="flex flex-col w-1/2">
-            <p>Suggested Address:</p>
-            <p>
-              {name} {validatedAddress}
-            </p>
+            <input
+              type="radio"
+              id="validatedAddress"
+              name="addressType"
+              value={validatedAddress}
+              onChange={() => setSelectedAddress(validatedAddress)}
+            />
+            <label htmlFor="validatedAddress">Validated Address:</label>
+            <p>{validatedAddress}</p>
           </div>
+          <button onClick={handleSetAddress}>Submit</button>
         </div>
       )}
+
+      {contactInfo.address && (
+        <div>
+          <p>Selected Address:</p>
+          <p>{contactInfo.address}</p>
+        </div>
+      )}
+
     </div>
   );
 };
