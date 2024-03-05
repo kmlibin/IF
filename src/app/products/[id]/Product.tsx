@@ -21,23 +21,27 @@ interface ProductProps {
 export default function Product({ product }: ProductProps) {
   const { state, dispatch } = useCart();
 
-
   // const [cart, setCart] = useState<any>(null);
   console.log(product);
 
   const addToCart = () => {
-    dispatch({ type: "ADD_TO_CART", payload: { id: product.id, data: product.data } });
+    dispatch({
+      type: "ADD_TO_CART",
+      payload: { id: product.id, data: product.data },
+    });
   };
 
   const removeFromCart = () => {
-    dispatch({ type: "REMOVE_FROM_CART", payload: product.id });
+    dispatch({
+      type: "REMOVE_FROM_CART",
+      payload: { id: product.id, data: product.data },
+    });
   };
 
   console.log(state);
 
   return (
     <div>
-
       {product && (
         <>
           <div>
