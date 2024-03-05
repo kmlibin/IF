@@ -14,21 +14,29 @@ interface CartItem {
   };
 }
 
-//declare actions
-type Action =
-  | { type: "ADD_TO_CART"; payload: CartItem }
-  | { type: "REMOVE_FROM_CART"; payload: CartItem }
-  | { type: "HYDRATE_CART"; payload: CartState };
+type ContactInfo = {
+  name: string;
+  email: string;
+  address: string;
+};
 
 interface CartState {
   cart: CartItem[];
   subtotal: number;
+  contactInfo: ContactInfo;
 }
+//declare actions
+type Action =
+  | { type: "ADD_TO_CART"; payload: CartItem }
+  | { type: "REMOVE_FROM_CART"; payload: CartItem }
+  | { type: "HYDRATE_CART"; payload: CartState }
+  | { type: "UPDATE_INFO"; payload: ContactInfo };
 
 //set init state
 const initialCartState: CartState = {
   cart: [],
   subtotal: 0,
+  contactInfo: { name: "", email: "", address: "" },
 };
 
 //create reducers
@@ -49,7 +57,9 @@ const cartReducer = (state: CartState, action: Action): CartState => {
       return newCartState;
 
     case "REMOVE_FROM_CART":
-      const removedItem = state.cart.find((item) => item.id === action.payload.id);
+      const removedItem = state.cart.find(
+        (item) => item.id === action.payload.id
+      );
       // item not found, return current state
       if (!removedItem) return state;
       const updatedSubtotalRemove =
@@ -63,8 +73,12 @@ const cartReducer = (state: CartState, action: Action): CartState => {
         subtotal: updatedSubtotalRemove,
       };
       localStorage.setItem("cart", JSON.stringify(newCartStateRemove));
- 
+
       return newCartStateRemove;
+
+      
+    case "UPDATE_INFO":
+      return {...state, contactInfo: action.payload}
 
     case "HYDRATE_CART":
       return action.payload;
