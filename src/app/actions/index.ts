@@ -5,8 +5,7 @@ import { collection, addDoc } from "firebase/firestore/lite";
 import { db } from "@/app/firebase/config";
 
 //responsible for initiating the creation of a paypal order
-export async function createOrder(cost: any) {
-  
+export async function createOrder(orderTotal: any) {
   try {
     //init paypal client
     const PaypalClient = client();
@@ -22,7 +21,7 @@ export async function createOrder(cost: any) {
         {
           amount: {
             currency_code: "USD",
-            value: cost,
+            value: String(orderTotal),
           },
           // shipping: {
           //   name: {
@@ -77,13 +76,14 @@ async function postOrderToFirebase(orderObject: any) {
 //responsible for capturing the payment
 export async function payOrder(
   orderId: string,
-  shippingAddress: any,
+  email: any,
+  name: any,
+  address: any,
   products: any
 ) {
-  console.log(shippingAddress)
-
   console.log("runs!");
-  console.log(orderId);
+  console.log(`email ${email} name${name}`)
+  // console.log(orderId);
   //initialize client again
   const PaypalClient = client();
   //new request to capture the specified order, using orderID
@@ -96,12 +96,14 @@ export async function payOrder(
   if (!response) {
     return { error: "true" };
   }
-  console.log(response);
+  // console.log(response);
 
   const orderObject = {
     PaypalPaymentId: orderId,
     PayPalemail: response.result.payer.email_address,
-    shippingAddress,
+    CustomerName: name,
+    CustomerEmail: email,
+    CustomerAddress: address,
     products,
   };
 
