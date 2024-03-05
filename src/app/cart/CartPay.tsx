@@ -69,18 +69,7 @@ const [cost, setCost] = useState("20")
   };
   return (
     <>
-  <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="name">Name:</label>
-        <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} required />
-      </div>
-      <div>
-        <label htmlFor="address">Address:</label>
-        <input type="text" id="address" value={address} onChange={(e) => setAddress(e.target.value)} required />
-        <button type="button" onClick={handleAddressValidation}>Validate Address</button>
-      </div>
-      <button type="submit">Submit</button>
-    </form>
+
       <PayPalScriptProvider options={initialOptions}>
         <div>
           {cart.map((item) => (
