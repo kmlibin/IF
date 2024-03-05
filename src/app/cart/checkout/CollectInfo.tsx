@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useCart } from "@/app/components/CartContext";
 
 type ContactInfo = {
   name: string;
@@ -7,15 +8,7 @@ type ContactInfo = {
   address: string;
 };
 
-type CollectInfoProps = {
-  contactInfo: ContactInfo;
-  setContactInfo: React.Dispatch<React.SetStateAction<ContactInfo>>;
-};
-
-const CollectInfo = ({
-  setContactInfo,
-  contactInfo,
-}: CollectInfoProps) => {
+const CollectInfo = () => {
   const [name, setName] = useState("");
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
@@ -26,6 +19,10 @@ const CollectInfo = ({
   const [userAddress, setUserAddress] = useState("");
   const [validatedAddress, setValidatedAddress] = useState("");
   const [selectedAddress, setSelectedAddress] = useState("");
+
+  const { state: globalState, dispatch } = useCart();
+  const { contactInfo } = globalState;
+  console.log(contactInfo)
 
   const handleAddressValidation = async () => {
     const cleanedAddress = userAddress.replace(/,/g, "");
@@ -52,6 +49,7 @@ const CollectInfo = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    //dispatching to global state, name, email, address once available. maybe set name and email here.
     //callback so that the value is immediately available
     setUserAddress((prevAddress) => {
       return `${addressLine1}, ${addressLine2}, ${city}, ${state}, ${zip}`;
@@ -59,10 +57,17 @@ const CollectInfo = ({
   };
 
   const handleSetAddress = () => {
-    if (selectedAddress) { 
-      setContactInfo({ name: name, email: email, address: selectedAddress });
+    if (selectedAddress) {
+      //set global state with address here
+      dispatch({
+        type: "UPDATE_INFO",
+        payload: { name: name, email: email, address: selectedAddress },
+      });
     } else {
-      setContactInfo({name: name, email: email, address: validatedAddress});
+      dispatch({
+        type: "UPDATE_INFO",
+        payload: { name: name, email: email, address: validatedAddress },
+      });
     }
   };
 
@@ -70,9 +75,9 @@ const CollectInfo = ({
     handleAddressValidation();
   }, [userAddress, validatedAddress, userAddress]);
 
-  useEffect(() => {
-    console.log(`contactInfo="${contactInfo.name} ${contactInfo.email} ${contactInfo.address}`);
-  }, [ contactInfo]);
+  //   useEffect(() => {
+  //     console.log(`contactInfo="${contactInfo.name} ${contactInfo.email} ${contactInfo.address}`);
+  //   }, [ contactInfo]);
 
   return (
     <div className="w-full bg-cyan-400">
@@ -177,13 +182,12 @@ const CollectInfo = ({
         </div>
       )}
 
-      {contactInfo.address && (
+      {contactInfo?.address && (
         <div>
           <p>Selected Address:</p>
           <p>{contactInfo.address}</p>
         </div>
       )}
-
     </div>
   );
 };
