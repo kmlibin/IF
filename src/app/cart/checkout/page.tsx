@@ -7,20 +7,28 @@ import { useCart } from "@/app/components/CartContext";
 
 export default function Checkout() {
   const [finalTotal, setFinalTotal] = useState(0);
-  const [finalAddress, setFinalAddress] = useState<string>("")
+  const [finalAddress, setFinalAddress] = useState<string>("");
+  const [contactInfo, setContactInfo] = useState({
+    name: "",
+    email: "",
+    address: "",
+  });
   const { state } = useCart();
   const { cart } = state;
-  const {subtotal} = state;
+  const { subtotal } = state;
 
-  console.log(cart)
+  console.log(cart);
 
   return (
     <div className="flex w-full">
       <div className="flex flex-col w-3/5">
-        <CollectInfo setFinalAddress={setFinalAddress} />
+        <CollectInfo
+          contactInfo={contactInfo}
+          setContactInfo={setContactInfo}
+        />
       </div>
       <div className="flex flex-col w-2/5">
-        <Summary cart={cart}  subtotal={subtotal} finalTotal={finalTotal} />
+        <Summary cart={cart} subtotal={subtotal} finalTotal={finalTotal} />
       </div>
     </div>
   );
