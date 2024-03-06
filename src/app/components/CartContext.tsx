@@ -1,17 +1,26 @@
 "use client";
 
-import { revalidatePath } from "next/cache";
 import React, { createContext, useContext, useReducer } from "react";
 import { useEffect } from "react";
 
-interface Product {
+// interface Product {
+//   id: string;
+//   data: {
+//     price: number | string;
+//     type: string;
+//     name: string;
+//     id: string;
+//   };
+//   quantity: number;
+// }
+
+interface CartItem {
   id: string;
   data: {
-    price: number | string;
-    type: string;
-    name: string;
-    id: string;
-  };
+    name: string,
+    type: string,
+    price: number | string
+  }
   quantity: number;
 }
 
@@ -22,14 +31,14 @@ type ContactInfo = {
 };
 
 interface CartState {
-  cart: Product[];
+  cart: CartItem[];
   subtotal: number;
   contactInfo: ContactInfo;
 }
 //declare actions
 type Action =
-  | { type: "ADD_TO_CART"; payload: Product }
-  | { type: "REMOVE_FROM_CART"; payload: Product }
+  | { type: "ADD_TO_CART"; payload: CartItem }
+  | { type: "REMOVE_FROM_CART"; payload: CartItem }
   | { type: "HYDRATE_CART"; payload: CartState }
   | { type: "UPDATE_INFO"; payload: ContactInfo };
 

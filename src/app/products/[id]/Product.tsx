@@ -31,7 +31,7 @@ export default function Product({ product }: ProductProps) {
   const addToCart = () => {
     dispatch({
       type: "ADD_TO_CART",
-      payload: { id: product.id, data: product.data, quantity: selectedQty },
+      payload: { id: product.id, data: {name: product.data.name, type: product.data.type, price: product.data.price}, quantity: selectedQty },
     });
   };
 
