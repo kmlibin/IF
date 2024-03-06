@@ -7,7 +7,7 @@ import { useCart } from "@/app/components/CartContext";
 import { PayPal } from "./PayPal";
 
 export default function Checkout() {
-  const [finalTotal, setFinalTotal] = useState(55);
+  const [finalTotal, setFinalTotal] = useState(0);
   const { state } = useCart();
   const {contactInfo} = state;
   const { cart } = state;
@@ -23,7 +23,7 @@ export default function Checkout() {
         <PayPal finalTotal={finalTotal} cart={cart} contactInfo={contactInfo}/>
       </div>
       <div className="flex flex-col w-2/5">
-        <Summary cart={cart} subtotal={subtotal} finalTotal={finalTotal} />
+        <Summary cart={cart} subtotal={subtotal} finalTotal={finalTotal} setFinalTotal={setFinalTotal} />
         
       </div>
     </div>
