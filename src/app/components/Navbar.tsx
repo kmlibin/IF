@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import logo from "../../../public/kmllogo.png";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,8 +6,13 @@ import React from "react";
 import { useCart } from "./CartContext";
 
 export default function Navbar() {
-  const {state} = useCart();
-  const {cart} = state
+  const { state } = useCart();
+  const { cart } = state;
+
+  //get total quantity of items in cart based on the quantity prop with each item
+  const totalQuantity = cart.reduce((total, item) => {
+    return total + item.quantity;
+  }, 0);
 
   return (
     <nav className="flex justify-evenly items-center">
@@ -21,7 +26,7 @@ export default function Navbar() {
           </li>
         ))}
         <li className="">
-          <Link href="/cart">Cart {cart && cart.length}</Link>
+          <Link href="/cart">Cart {cart && totalQuantity}</Link>
         </li>
       </ul>
     </nav>
