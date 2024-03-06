@@ -1,8 +1,13 @@
 "use server";
 import client from "../utils/paypal/client";
 import paypal from "@paypal/checkout-server-sdk";
-import { collection, addDoc } from "firebase/firestore/lite";
+import { collection, addDoc, getDoc, updateDoc, doc } from "firebase/firestore/lite";
 import { db } from "@/app/firebase/config";
+
+
+//remove what doesn't need to be returned!
+//type things correctly
+//handle errors
 
 //responsible for initiating the creation of a paypal order
 export async function createOrder(orderTotal: any) {
@@ -23,18 +28,6 @@ export async function createOrder(orderTotal: any) {
             currency_code: "USD",
             value: String(orderTotal),
           },
-          // shipping: {
-          //   name: {
-          //     full_name: "john doe"
-          //   },
-          //   address: {
-          //     address_line_1: "address line 1 works",
-          //     admin_area_2: 'Phoenix',
-          //     admin_area_1: 'AZ',
-          //     postal_code: '85001',
-          //     country_code: 'US'
-          //   }
-          // }
         },
       ],
     });
@@ -51,7 +44,7 @@ export async function createOrder(orderTotal: any) {
     //extract orderID from the response, then return it
     const orderId = response.result.id;
 
-    return { success: "true", orderId };
+    return { success: "true", orderId, orderTotal };
   } catch (err) {
     console.log("Err at Create Order: ", err);
     return { error: "true" };
@@ -73,16 +66,29 @@ async function postOrderToFirebase(orderObject: any) {
   }
 }
 
+//NEED TO:
+//I need to split off functions for updating and posting to the database; hopefully can put in server actions
+//try/catch or if or something. ONLY post the order if the response is successful.
+//figure out how i want to handle errors for user
+//need to type things correctly
+//revalidate data somewhere since orders changed and product quantities changed. probably in server actions...?
+//paypal loadind button states
+//redirect user to order confirmation page on success
+
 //responsible for capturing the payment
 export async function payOrder(
   orderId: string,
   email: any,
   name: any,
   address: any,
-  products: any
+  products: any,
+  orderTotal: any
+  
 ) {
   console.log("runs!");
-  // console.log(`email ${email} name${name}`)
+  console.log(`email ${email} name${name}`)
+
+
   // console.log(orderId);
   //initialize client again
   const PaypalClient = client();
@@ -95,14 +101,33 @@ export async function payOrder(
   if (!response) {
     return { error: "true" };
   }
-  console.log(response.result.purchase_units);
 
-  const paidAt = new Date();
+   // update quantity of each purchased item in Firebase
+   for (const product of products) {
+    const productId = product.id;
+    const purchasedQuantity = product.quantity;
 
-// Format the date and time if needed
-// For example, to store it as a string in ISO format:
+    // find the document in the products collection
+    const productDocRef = doc(db, "products", productId);
+
+    // get the product data and ultimately the quantity
+    const productDocSnapshot = await getDoc(productDocRef);
+    const currentQuantity = productDocSnapshot?.data()?.quantity;
+
+    // update the quantity in a variable. Math.max(0...ensures that the value CANNOT be negative!)
+    const updatedQuantity = Math.max(0, currentQuantity - purchasedQuantity);
+
+    // pass the updated quantity to the document
+    await updateDoc(productDocRef, { quantity: updatedQuantity });
+  }
+
+  //need to send to firebase ONLY if response is 201 (or whatever it is..check)
+ 
+//create a new date in iso to send to fb
+const paidAt = new Date();
 const paidAtIso = paidAt.toISOString();
 
+//might not need shipping address, paypal collects it and it displays on their UI.
   const orderObject = {
     PaypalPaymentId: orderId,
     PayPalemail: response.result.payer.email_address,
@@ -110,7 +135,12 @@ const paidAtIso = paidAt.toISOString();
     CustomerEmail: email,
     CustomerAddress: address,
     paidAt: paidAtIso,
+    orderTotal: orderTotal,
+    hasShipped: false,
+    shipMethod: "USPS Ground",
+    tracking: "none",
     products,
+    
   };
 
   await postOrderToFirebase(orderObject);
