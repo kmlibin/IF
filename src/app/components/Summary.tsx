@@ -10,6 +10,7 @@ interface CartItem {
     name: string;
     id: string;
   };
+  quantity: number;
 }
 
 interface Cart {
@@ -20,12 +21,18 @@ type SummaryProps = {
   cart: CartItem[];
   subtotal: number;
   finalTotal: number;
+  setFinalTotal: React.Dispatch<React.SetStateAction<number>>;
 };
 
-const Summary = ({ cart, subtotal, finalTotal }: SummaryProps) => {
+const Summary = ({ cart, subtotal, finalTotal, setFinalTotal }: SummaryProps) => {
   console.log(cart);
+
+  if(subtotal) {
+    setFinalTotal(subtotal + 10)
+  }
+  
   return (
-    <div className="w-5/6 flex flex-col">
+    <div className="w-5/6 flex flex-col bg-cyan-200">
       {cart.map((item) => (
         <div
           key={item.id}
@@ -33,14 +40,14 @@ const Summary = ({ cart, subtotal, finalTotal }: SummaryProps) => {
         >
           <Image src={quilt} alt="quilt" height={75} width={105} />
           <p>{item.data.name}</p>
-          <p>x 1</p>
-          <p>{item.data.price}</p>
+          <p>x {item.quantity}</p>
+          <p>${item.data.price}</p>
         </div>
       ))}
       <div className="flex flex-col w-full justify-end items-end">
         <p>subtotal: {subtotal}</p>
         <p>shipping: $10</p>
-        <p>Total: {subtotal + 10}</p>
+        <p>Total: ${finalTotal}</p>
       </div>
     </div>
   );
