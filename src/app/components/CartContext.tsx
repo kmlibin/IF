@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import React, { createContext, useContext, useReducer } from "react";
 import { useEffect } from "react";
 
-interface CartItem {
+interface Product {
   id: string;
   data: {
     price: number | string;
@@ -12,6 +12,7 @@ interface CartItem {
     name: string;
     id: string;
   };
+  quantity: number;
 }
 
 type ContactInfo = {
@@ -21,14 +22,14 @@ type ContactInfo = {
 };
 
 interface CartState {
-  cart: CartItem[];
+  cart: Product[];
   subtotal: number;
   contactInfo: ContactInfo;
 }
 //declare actions
 type Action =
-  | { type: "ADD_TO_CART"; payload: CartItem }
-  | { type: "REMOVE_FROM_CART"; payload: CartItem }
+  | { type: "ADD_TO_CART"; payload: Product }
+  | { type: "REMOVE_FROM_CART"; payload: Product }
   | { type: "HYDRATE_CART"; payload: CartState }
   | { type: "UPDATE_INFO"; payload: ContactInfo };
 
@@ -43,30 +44,75 @@ const initialCartState: CartState = {
 const cartReducer = (state: CartState, action: Action): CartState => {
   switch (action.type) {
     case "ADD_TO_CART":
-      const updatedCart = [...state.cart, action.payload];
-      const updatedSubtotal = updatedCart.reduce(
-        (total, item) => total + Number(item.data.price),
-        0
-      );
-      const newCartState = {
-        ...state,
-        cart: updatedCart,
-        subtotal: updatedSubtotal,
-      };
-      localStorage.setItem("cart", JSON.stringify(newCartState));
-      return newCartState;
-
-    case "REMOVE_FROM_CART":
-      const removedItem = state.cart.find(
+      //FIRST check if the item is already in the cart. if so, find and update the quantity
+      const existingItem = state.cart.find(
         (item) => item.id === action.payload.id
       );
+      if (existingItem) {
+        // If the item exists, update its quantity
+        const updatedCart = state.cart.map((item) => {
+          if (item.id === existingItem.id) {
+            //return the item, but adjust quantity
+            return {
+              ...item,
+              quantity: action.payload.quantity,
+            };
+          } else {
+            return item;
+          }
+        });
+
+        //make sure the quantity of each item is reflected in the subtotal
+        const updatedSubtotal = updatedCart.reduce(
+          (total, item) => total + Number(item.data.price) * item.quantity,
+          0
+        );
+
+        const newCartState = {
+          ...state,
+          cart: updatedCart,
+          subtotal: updatedSubtotal,
+        };
+        localStorage.setItem("cart", JSON.stringify(newCartState));
+        return newCartState;
+      } else {
+        // SECOND if item does not exist in cart, add it to the cart
+        const updatedCart = [
+          ...state.cart,
+          { ...action.payload, quantity: action.payload.quantity },
+        ];
+
+        const updatedSubtotal = updatedCart.reduce(
+          (total, item) => total + Number(item.data.price) * item.quantity,
+          0
+        );
+        const newCartState = {
+          ...state,
+          cart: updatedCart,
+          subtotal: updatedSubtotal,
+        };
+        localStorage.setItem("cart", JSON.stringify(newCartState));
+        return newCartState;
+      }
+
+    case "REMOVE_FROM_CART":
+      //grab item to be removed
+      const removedItemId = action.payload.id;
+
       // item not found, return current state
-      if (!removedItem) return state;
-      const updatedSubtotalRemove =
-        state.subtotal - Number(removedItem.data.price);
+      if (!removedItemId) return state;
+
+      //filter out item that needs to be removed
       const updatedCartRemove = state.cart.filter(
-        (item) => item.id !== action.payload.id
+        (item) => item.id !== removedItemId
       );
+
+      // calculate the new subtotal
+      const updatedSubtotalRemove = updatedCartRemove.reduce(
+        (total, item) => total + Number(item.data.price) * item.quantity,
+        0
+      );
+        
       const newCartStateRemove = {
         ...state,
         cart: updatedCartRemove,
@@ -76,9 +122,8 @@ const cartReducer = (state: CartState, action: Action): CartState => {
 
       return newCartStateRemove;
 
-      
     case "UPDATE_INFO":
-      return {...state, contactInfo: action.payload}
+      return { ...state, contactInfo: action.payload };
 
     case "HYDRATE_CART":
       return action.payload;
