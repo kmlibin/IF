@@ -82,13 +82,12 @@ export async function payOrder(
   products: any
 ) {
   console.log("runs!");
-  console.log(`email ${email} name${name}`)
+  // console.log(`email ${email} name${name}`)
   // console.log(orderId);
   //initialize client again
   const PaypalClient = client();
   //new request to capture the specified order, using orderID
   const request = new paypal.orders.OrdersCaptureRequest(orderId);
-
   //@ts-ignore
   request.requestBody({});
 
@@ -96,7 +95,13 @@ export async function payOrder(
   if (!response) {
     return { error: "true" };
   }
-  // console.log(response);
+  console.log(response.result.purchase_units);
+
+  const paidAt = new Date();
+
+// Format the date and time if needed
+// For example, to store it as a string in ISO format:
+const paidAtIso = paidAt.toISOString();
 
   const orderObject = {
     PaypalPaymentId: orderId,
@@ -104,6 +109,7 @@ export async function payOrder(
     CustomerName: name,
     CustomerEmail: email,
     CustomerAddress: address,
+    paidAt: paidAtIso,
     products,
   };
 
