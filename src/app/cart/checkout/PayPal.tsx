@@ -7,11 +7,11 @@ import { createOrder, payOrder } from "../../actions/index";
 interface CartItem {
   id: string;
   data: {
-    price: number | string;
-    type: string;
     name: string;
-    id: string;
+    type: string;
+    price: number | string;
   };
+  quantity: number;
 }
 
 type ContactInfo = {
@@ -34,18 +34,20 @@ export const PayPal = ({ finalTotal, cart, contactInfo }: PayPalProps) => {
     intent: "capture",
   };
 
+  let orderTotal: any;
   //had to confirm that contact info existed in order to send the state in the onapprove. should probably do that for products, but there will be a lot of
   //reworking and conditional rendering as i finish the ui. just trying to get functionality at the moment
   return (
     <>
-      {contactInfo && (
+      {contactInfo.name.length > 1 && finalTotal && (
         <PayPalScriptProvider options={initialOptions}>
           <div>
             <PayPalButtons
               createOrder={async (data, actions) => {
                 let response = await createOrder(finalTotal);
                 if (response.success === "true") {
-                  return response.orderId; //success
+                  orderTotal = response.orderTotal;
+                  return response.orderId;
                 } else {
                   //  error from createOrder function
                   console.error("Error creating order:", response.error);
@@ -53,14 +55,15 @@ export const PayPal = ({ finalTotal, cart, contactInfo }: PayPalProps) => {
                 }
               }}
               onApprove={async (data, actions) => {
-                const products = { cart };
+                const products =  cart ;
                 const { name, email, address } = contactInfo;
                 let response = await payOrder(
                   data.orderID,
                   email,
                   name,
                   address,
-                  products
+                  products,
+                  orderTotal
                 );
                 if (response && response.success === "true") {
                   console.log("Payment successful");
