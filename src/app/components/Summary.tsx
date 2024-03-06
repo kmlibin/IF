@@ -3,15 +3,15 @@ import Image from "next/image";
 import quilt from "../../../public/quilt.jpg";
 
 interface CartItem {
-  id: string;
-  data: {
-    price: number | string;
-    type: string;
-    name: string;
     id: string;
-  };
-  quantity: number;
-}
+    data: {
+      name: string,
+      type: string,
+      price: number | string
+    }
+    quantity: number;
+  }
+  
 
 interface Cart {
   cart: CartItem[];
