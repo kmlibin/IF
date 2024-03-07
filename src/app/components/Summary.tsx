@@ -1,22 +1,9 @@
 import React from "react";
 import Image from "next/image";
 import quilt from "../../../public/quilt.jpg";
+import { CartItem } from "../types";
 
-interface CartItem {
-    id: string;
-    data: {
-      name: string,
-      type: string,
-      price: number | string
-    }
-    quantity: number;
-  }
-  
 
-interface Cart {
-  cart: CartItem[];
-  subtotal: number;
-}
 type SummaryProps = {
   cart: CartItem[];
   subtotal: number;

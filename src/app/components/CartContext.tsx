@@ -2,33 +2,8 @@
 
 import React, { createContext, useContext, useReducer } from "react";
 import { useEffect } from "react";
+import { CartItem, ContactInfo } from "../types";
 
-// interface Product {
-//   id: string;
-//   data: {
-//     price: number | string;
-//     type: string;
-//     name: string;
-//     id: string;
-//   };
-//   quantity: number;
-// }
-
-interface CartItem {
-  id: string;
-  data: {
-    name: string,
-    type: string,
-    price: number | string
-  }
-  quantity: number;
-}
-
-type ContactInfo = {
-  name: string;
-  email: string;
-  address: string;
-};
 
 interface CartState {
   cart: CartItem[];

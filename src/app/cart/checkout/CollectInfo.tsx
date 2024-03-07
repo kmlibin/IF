@@ -2,11 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { useCart } from "@/app/components/CartContext";
 
-type ContactInfo = {
-  name: string;
-  email: string;
-  address: string;
-};
 
 const CollectInfo = () => {
   const [name, setName] = useState("");
@@ -22,7 +17,9 @@ const CollectInfo = () => {
 
   const { state: globalState, dispatch } = useCart();
   const { contactInfo } = globalState;
-  console.log(contactInfo)
+//   console.log(contactInfo)
+
+console.log(name)
 
   const handleAddressValidation = async () => {
     const cleanedAddress = userAddress.replace(/,/g, "");
@@ -55,6 +52,7 @@ const CollectInfo = () => {
       return `${addressLine1}, ${addressLine2}, ${city}, ${state}, ${zip}`;
     });
   };
+
 
   const handleSetAddress = () => {
     if (selectedAddress) {

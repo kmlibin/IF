@@ -3,18 +3,8 @@ import Image from "next/image";
 import { useState } from "react";
 import quilt from "../../../../public/quilt.jpg";
 import { useCart } from "@/app/components/CartContext";
+import { ProductData } from "@/app/types";
 
-interface ProductData {
-  id: string;
-  data: {
-    price: number | string;
-    type: string;
-    name: string;
-    id: string;
-    description: string;
-    quantity: number;
-  };
-}
 
 interface ProductProps {
   product: ProductData;
