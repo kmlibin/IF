@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useCart } from "@/app/components/CartContext";
+import { handleAddressValidation } from "@/app/utils";
 
 
 const CollectInfo = () => {
@@ -20,29 +21,6 @@ const CollectInfo = () => {
 //   console.log(contactInfo)
 
 console.log(name)
-
-  const handleAddressValidation = async () => {
-    const cleanedAddress = userAddress.replace(/,/g, "");
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-          cleanedAddress
-        )}&key=${process.env.NEXT_PUBLIC_GOOGLE_API_KEY}`
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-
-        if (data.results.length > 0) {
-          setValidatedAddress(data.results[0].formatted_address);
-        }
-      } else {
-        console.error("Error validating address:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error validating address:", error);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -70,8 +48,14 @@ console.log(name)
   };
 
   useEffect(() => {
-    handleAddressValidation();
-  }, [userAddress, validatedAddress, userAddress]);
+    const fetchAddress = async () => {
+      const returnedAddress = await handleAddressValidation(userAddress);
+      setValidatedAddress(returnedAddress);
+    };
+  
+    fetchAddress();
+  }, [userAddress]);
+
 
   //   useEffect(() => {
   //     console.log(`contactInfo="${contactInfo.name} ${contactInfo.email} ${contactInfo.address}`);
