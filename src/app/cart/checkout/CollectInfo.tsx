@@ -27,7 +27,8 @@ console.log(name)
     //dispatching to global state, name, email, address once available. maybe set name and email here.
     //callback so that the value is immediately available
     setUserAddress((prevAddress) => {
-      return `${addressLine1}, ${addressLine2}, ${city}, ${state}, ${zip}`;
+      let address2 = addressLine2? `${addressLine2},` : ""
+      return `${addressLine1}, ${address2} ${city}, ${state} ${zip}`;
     });
   };
 
