@@ -5,6 +5,7 @@ import Summary from "@/app/components/Summary";
 import CollectInfo from "./CollectInfo";
 import { useCart } from "@/app/components/CartContext";
 import { PayPal } from "./PayPal";
+import ChooseShipping from "./ChooseShipping";
 
 export default function Checkout() {
   const [finalTotal, setFinalTotal] = useState(0);
@@ -13,12 +14,13 @@ export default function Checkout() {
   const { cart } = state;
   const { subtotal } = state;
 
-  console.log(cart);
+  // console.log(cart);
 
   return (
     <div className="flex w-full">
       <div className="flex flex-col w-3/5">
         <CollectInfo />
+        <ChooseShipping />
         <PayPal finalTotal={finalTotal} cart={cart} contactInfo={contactInfo} />
       </div>
       <div className="flex flex-col w-2/5">
