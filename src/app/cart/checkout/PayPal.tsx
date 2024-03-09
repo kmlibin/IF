@@ -3,6 +3,7 @@ import React from "react";
 
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { createOrder, payOrder } from "../../actions/index";
+import { useCart } from "@/app/components/CartContext";
 
 interface CartItem {
   id: string;
@@ -20,13 +21,14 @@ type ContactInfo = {
   address: string;
 };
 
-interface PayPalProps {
+type PayPalProps = {
   finalTotal: number;
   cart: CartItem[];
   contactInfo: ContactInfo;
 }
 
-export const PayPal = ({ finalTotal, cart, contactInfo }: PayPalProps) => {
+export const PayPal = ({ finalTotal, contactInfo, cart }: PayPalProps) => {
+
   const client = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
   const initialOptions = {
     clientId: client,
