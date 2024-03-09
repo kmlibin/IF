@@ -3,7 +3,7 @@ import React from "react";
 
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { createOrder, payOrder } from "../../actions/index";
-import { useCart } from "@/app/components/CartContext";
+
 
 interface CartItem {
   id: string;
