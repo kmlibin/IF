@@ -4,6 +4,31 @@ import paypal from "@paypal/checkout-server-sdk";
 import { collection, addDoc, getDoc, updateDoc, doc } from "firebase/firestore/lite";
 import { db } from "@/app/firebase/config";
 
+export const handleAddressValidation = async (userAddress: any) => {
+  "use server";
+  const cleanedAddress = userAddress.replace(/,/g, "");
+  console.log(cleanedAddress);
+  try {
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+        cleanedAddress
+      )}&key=${process.env.GOOGLE_API_KEY}`
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data.results.length > 0) {
+        let formattedAddress = data.results[0].formatted_address;
+        return formattedAddress;
+      }
+    } else {
+      console.error("Error validating address:", response.statusText);
+    }
+  } catch (error) {
+    console.error("Error validating address:", error);
+  }
+};
 
 //remove what doesn't need to be returned!
 //type things correctly
@@ -74,6 +99,7 @@ async function postOrderToFirebase(orderObject: any) {
 //revalidate data somewhere since orders changed and product quantities changed. probably in server actions...?
 //paypal loadind button states
 //redirect user to order confirmation page on success
+//needs to send emails, one to the admin, one to the client
 
 //responsible for capturing the payment
 export async function payOrder(
