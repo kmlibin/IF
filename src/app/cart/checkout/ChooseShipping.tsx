@@ -3,7 +3,9 @@ import React, { useState, useEffect } from "react";
 
 import { useCart } from "@/app/components/CartContext";
 
-type Props = {};
+type ChooseShippingProps = {
+  setShipping: any;
+};
 
 const displayAddress = (address: string) => {
   const parts = address.split(",").map((part) => part.trim());
@@ -33,7 +35,7 @@ const isAddressLine2 = (part: string) => {
 
 const calculateShipping = (subtotal: number, countryCode: string) => {
   let country = countryCode;
-  let rates = {}
+  let rates = {};
   if (!country) {
     country = "USA";
   }
@@ -46,31 +48,27 @@ const calculateShipping = (subtotal: number, countryCode: string) => {
   }
 
   if (subtotal > 16 && subtotal < 50) {
-    rates = { priority: 10, free: false };
+    rates = { standard: undefined, priority: 10, free: false };
   }
 
   if (subtotal >= 50) {
-    rates ={ free: true };
+    rates = { standard: undefined, priority: undefined, free: true };
   }
 
-  return rates
+  return rates;
 };
 
-
 type ShippingRates = {
-    standard?: number;
-    priority?: number;
-    free?: boolean;
-  };
+  standard?: number |undefined;
+  priority?: number | undefined;
+  free?: boolean | undefined;
+};
 
-const ChooseShipping = (props: Props) => {
-  const [shipping, setShipping] = useState(5);
-  const [shippingRates, setShippingRates] = useState<ShippingRates>({})
+const ChooseShipping = ({ setShipping }: ChooseShippingProps) => {
+  const [shippingRates, setShippingRates] = useState<ShippingRates>({standard: undefined, priority: undefined, free: false});
   const { state } = useCart();
   const { subtotal } = state;
   const { contactInfo } = state;
-
-  console.log(contactInfo);
 
   useEffect(() => {
     const rates = calculateShipping(subtotal, "USA");
@@ -81,6 +79,15 @@ const ChooseShipping = (props: Props) => {
   }, [subtotal]);
 
   const formattedAddress = displayAddress(contactInfo.address);
+
+  const handleShippingSelect = (rate: number | undefined) => {
+    if(typeof rate !== "undefined") {
+      setShipping(rate);
+    }
+    
+  };
+
+  
   return (
     <div className="flex">
       <div className="w-1/3 flex flex-col">
@@ -89,15 +96,32 @@ const ChooseShipping = (props: Props) => {
           <p key={index}>{line}</p>
         ))}
       </div>
-      <div className="w-2/3">
+      <div className="w-2/3 flex flex-col">
+        <p>Choose Shipping:</p>
         {shippingRates && shippingRates.free === true && (
           <p>This order qualifies for Free Shipping!</p>
         )}
-        {shippingRates && shippingRates.priority && (
-          <p>Priority Shipping: {shippingRates.priority}</p>
+        {shippingRates && typeof shippingRates.priority !== 'undefined' && (
+          <label>
+            <input
+              type="radio"
+              name="shippingOption"
+              value={shippingRates.priority}
+              onChange={() => handleShippingSelect(shippingRates.priority)}
+            />
+            Priority Shipping: {shippingRates.priority}
+          </label>
         )}
-        {shippingRates && shippingRates.standard && (
-          <p>Standard Shipping: {shippingRates.standard}</p>
+        {shippingRates && typeof shippingRates.standard !== 'undefined' && (
+          <label>
+            <input
+              type="radio"
+              name="shippingOption"
+              value={shippingRates.standard}
+              onChange={() => handleShippingSelect(shippingRates.standard)}
+            />
+            Standard Shipping: {shippingRates.standard}
+          </label>
         )}
       </div>
     </div>
