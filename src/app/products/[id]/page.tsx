@@ -1,4 +1,4 @@
-import { getProductById } from "@/app/utils";
+import { getProductById } from "@/app/firebase/queries";
 import Product from "./Product";
 
 

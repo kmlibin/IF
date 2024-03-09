@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import quilt from "../../../public/quilt.jpg";
 import Link from "next/link";
-import { getProducts } from "../utils";
+import { getProducts } from "../firebase/queries";
 
 interface Product {
   name: string;

@@ -1,4 +1,3 @@
-'use server'
 import { collection, getDocs, doc, getDoc } from "firebase/firestore/lite";
 import { db } from "@/app/firebase/config";
 
@@ -7,9 +6,9 @@ interface Product {
   type: string;
   price: number;
 }
-
+//RIGHT NOW HANDLE ADDRESS VAIDATION WONT WORK UNLESS YOU PUT USE SERVER AT THE TOP. FIGURE OUT WHERE TO CALL THIS
 //need to put these in try/catches
-
+//run these from server components!
 export async function getProducts() {
   const productCol = collection(db, "products");
   const productSnapshot = await getDocs(productCol);
@@ -22,7 +21,9 @@ export async function getProducts() {
   return productsList;
 }
 
-export async function getProductById(id: string): Promise<{ id: string; data: Product | undefined }> {
+export async function getProductById(
+  id: string
+): Promise<{ id: string; data: Product | undefined }> {
   // console.log(`in call ${id}`);
   const productRef = doc(db, "products", id);
   const productSnapshot = await getDoc(productRef);
@@ -32,31 +33,6 @@ export async function getProductById(id: string): Promise<{ id: string; data: Pr
     return { id: productSnapshot.id, data: productData };
   }
 
-  return { id: '', data: undefined }
+  return { id: "", data: undefined };
 }
-
-export const handleAddressValidation = async (userAddress: any) => {
-  const cleanedAddress = userAddress.replace(/,/g, "");
-  console.log(cleanedAddress)
-  try {
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-        cleanedAddress
-      )}&key=${process.env.GOOGLE_API_KEY}`
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-
-      if (data.results.length > 0) {
-        let formattedAddress = data.results[0].formatted_address;
-        return formattedAddress
-      }
-    } else {
-      console.error("Error validating address:", response.statusText);
-    }
-  } catch (error) {
-    console.error("Error validating address:", error);
-  }
-};
 
