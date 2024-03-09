@@ -5,17 +5,18 @@ import { CartItem } from "../types";
 
 
 type SummaryProps = {
+  shipping: number | undefined;
   cart: CartItem[];
   subtotal: number;
   finalTotal: number;
   setFinalTotal: React.Dispatch<React.SetStateAction<number>>;
 };
 
-const Summary = ({ cart, subtotal, finalTotal, setFinalTotal }: SummaryProps) => {
+const Summary = ({ shipping, cart, subtotal, finalTotal, setFinalTotal }: SummaryProps) => {
   console.log(cart);
 
-  if(subtotal) {
-    setFinalTotal(subtotal + 10)
+  if(subtotal && shipping !== undefined) {
+    setFinalTotal(subtotal + shipping)
   }
   
   return (
@@ -33,7 +34,7 @@ const Summary = ({ cart, subtotal, finalTotal, setFinalTotal }: SummaryProps) =>
       ))}
       <div className="flex flex-col w-full justify-end items-end">
         <p>subtotal: {subtotal}</p>
-        <p>shipping: $10</p>
+        <p>shipping: {shipping}</p>
         <p>Total: ${finalTotal}</p>
       </div>
     </div>
