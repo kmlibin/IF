@@ -16,7 +16,9 @@ interface ProductPageProps {
       price: number | string,
       type: string,
       name: string,
-      id: string
+      id: string,
+      quantity: number,
+      description: string
     }
   }
 
