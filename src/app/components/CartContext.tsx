@@ -4,7 +4,6 @@ import React, { createContext, useContext, useReducer } from "react";
 import { useEffect } from "react";
 import { CartItem, ContactInfo } from "../types";
 
-
 interface CartState {
   cart: CartItem[];
   subtotal: number;
@@ -15,7 +14,9 @@ type Action =
   | { type: "ADD_TO_CART"; payload: CartItem }
   | { type: "REMOVE_FROM_CART"; payload: CartItem }
   | { type: "HYDRATE_CART"; payload: CartState }
-  | { type: "UPDATE_INFO"; payload: ContactInfo };
+  | { type: "UPDATE_INFO"; payload: ContactInfo }
+  | { type: "CLEAR_INFO" }
+  | { type: "CLEAR_CART" };
 
 //set init state
 const initialCartState: CartState = {
@@ -96,7 +97,7 @@ const cartReducer = (state: CartState, action: Action): CartState => {
         (total, item) => total + Number(item.data.price) * item.quantity,
         0
       );
-        
+
       const newCartStateRemove = {
         ...state,
         cart: updatedCartRemove,
@@ -108,6 +109,14 @@ const cartReducer = (state: CartState, action: Action): CartState => {
 
     case "UPDATE_INFO":
       return { ...state, contactInfo: action.payload };
+
+    case "CLEAR_CART":
+      localStorage.removeItem("cart");
+      return { ...state, cart: [] };
+
+    case "CLEAR_INFO":
+      localStorage.removeItem("contactInfo");
+      return { ...state, contactInfo: { name: "", email: "", address: "" } };
 
     case "HYDRATE_CART":
       return action.payload;
