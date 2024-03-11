@@ -99,7 +99,15 @@ const ChooseShipping = ({ setShipping }: ChooseShippingProps) => {
       <div className="w-2/3 flex flex-col">
         <p>Choose Shipping:</p>
         {shippingRates && shippingRates.free === true && (
-          <p>This order qualifies for Free Shipping!</p>
+            <label>
+            <input
+              type="radio"
+              name="shippingOption"
+              value="0"
+              onChange={() => handleShippingSelect(0)}
+            />
+            This order qualifies for free shipping! 0.00
+          </label>
         )}
         {shippingRates && typeof shippingRates.priority !== 'undefined' && (
           <label>
