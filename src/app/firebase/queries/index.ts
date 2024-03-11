@@ -1,12 +1,12 @@
 import { collection, getDocs, doc, getDoc } from "firebase/firestore/lite";
 import { db } from "@/app/firebase/config";
+import { CartItem } from "@/app/types";
 
 interface Product {
   name: string;
   type: string;
   price: number;
 }
-//RIGHT NOW HANDLE ADDRESS VAIDATION WONT WORK UNLESS YOU PUT USE SERVER AT THE TOP. FIGURE OUT WHERE TO CALL THIS
 //need to put these in try/catches
 //run these from server components!
 export async function getProducts() {
@@ -36,3 +36,35 @@ export async function getProductById(
   return { id: "", data: undefined };
 }
 
+//validate prices, creates an object of key value pairs where key is id, value is price
+
+export async function fetchPricesFromFirebase(cart: CartItem[]) {
+  try {
+    const prices: Record<string, number> = {};
+
+    // Iterate over the items in the cart to fetch their prices
+    for (const item of cart) {
+      const itemId = item.id;
+      const productDocRef = doc(db, "products", itemId);
+      const productDocSnapshot = await getDoc(productDocRef);
+
+      // check if the document exists and has a price field
+      if (productDocSnapshot.exists()) {
+        const price = productDocSnapshot.data()?.price;
+
+        // add the price to the prices object
+        if (price !== undefined) {
+          prices[itemId] = price;
+        } else {
+          throw new Error(`Price not found for item ${itemId}`);
+        }
+      } else {
+        throw new Error(`Item ${itemId} not found in the database`);
+      }
+    }
+
+    return prices;
+  } catch (err) {
+    throw new Error ("Error fetching prices from database");
+  }
+}
