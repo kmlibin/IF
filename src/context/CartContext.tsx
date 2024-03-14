@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useReducer } from "react";
 import { useEffect } from "react";
-import { CartItem, ContactInfo } from "../types";
+import { CartItem, ContactInfo } from "../app/types";
 
 interface CartState {
   cart: CartItem[];
