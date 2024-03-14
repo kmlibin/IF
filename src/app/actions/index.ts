@@ -1,7 +1,9 @@
 "use server";
 import client from "../utils/paypal/client";
+import { Auth, signInWithEmailAndPassword } from "firebase/auth";
 import { revalidatePath } from "next/cache";
 import paypal from "@paypal/checkout-server-sdk";
+
 import {
   collection,
   addDoc,
@@ -10,10 +12,38 @@ import {
   doc,
 } from "firebase/firestore/lite";
 import { db } from "@/app/firebase/config";
+import { auth } from "@/app/firebase/config";
 import { CartItem } from "../types";
 import { fetchPricesFromFirebase } from "../firebase/queries";
-import { redirect } from "next/navigation";
 
+export async function login(email: string, password: string) {
+  try {
+    const response = await signInWithEmailAndPassword(auth, email, password);
+    let admin;
+    //after successful login, get the users information from the users collection, stored by uid
+    if (auth.currentUser) {
+      const uid = auth.currentUser.uid;
+      const userDoc = await getDoc(doc(db, "users", uid));
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+
+        //set admin to true so can return to frontend
+        if (userData.isAdmin) {
+          admin = true;
+        }
+      }
+
+      // store auth token and store it in local storage
+      const token = await auth.currentUser.getIdToken();
+      return { token, admin };
+    }
+    console.log("Login success!");
+  } catch (error: any) {
+    console.log("Login failed:", error.message);
+    return error.message;
+  }
+}
 export const handleAddressValidation = async (userAddress: any) => {
   const cleanedAddress = userAddress.replace(/,/g, "");
   console.log(cleanedAddress);
