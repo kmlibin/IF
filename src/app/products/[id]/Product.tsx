@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import quilt from "../../../../public/quilt.jpg";
-import { useCart } from "@/app/components/CartContext";
+import { useCart } from "@/context/CartContext";
 import { ProductData } from "@/app/types";
 
 

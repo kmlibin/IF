@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useCart } from "@/app/components/CartContext";
+import { useCart } from "@/context/CartContext";
 import ValidateShipping from "./ValidateShipping";
 
 type CollectInfoProps = {

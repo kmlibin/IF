@@ -3,7 +3,7 @@ import logo from "../../../public/kmllogo.png";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import { useCart } from "./CartContext";
+import { useCart } from "../../context/CartContext";
 
 export default function Navbar() {
   const { state } = useCart();

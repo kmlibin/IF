@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { useCart } from '@/app/components/CartContext'
+import { useCart } from '@/context/CartContext'
 
 
 

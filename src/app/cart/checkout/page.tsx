@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Summary from "@/app/components/Summary";
 import CollectInfo from "./CollectInfo";
-import { useCart } from "@/app/components/CartContext";
+import { useCart } from "@/context/CartContext";
 import { PayPal } from "./PayPal";
 import ChooseShipping from "./ChooseShipping";
 import { handleAddressValidation } from "@/app/actions";
