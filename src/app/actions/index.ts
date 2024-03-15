@@ -15,12 +15,14 @@ import { db } from "@/app/firebase/config";
 import { auth } from "@/app/firebase/config";
 import { CartItem } from "../types";
 import { fetchPricesFromFirebase } from "../firebase/queries";
+import { destroyCookie, parseCookies } from "nookies";
 
 export async function login(email: string, password: string) {
   try {
     const response = await signInWithEmailAndPassword(auth, email, password);
     let admin;
     //after successful login, get the users information from the users collection, stored by uid
+    console.log(`currentUser : ${auth.currentUser}`);
     if (auth.currentUser) {
       const uid = auth.currentUser.uid;
       const userDoc = await getDoc(doc(db, "users", uid));
@@ -36,6 +38,8 @@ export async function login(email: string, password: string) {
 
       // store auth token and store it in local storage
       const token = await auth.currentUser.getIdToken();
+      // Cookies.set("userToken", token, { expires: 1 });
+
       return { token, admin };
     }
     console.log("Login success!");
@@ -45,14 +49,23 @@ export async function login(email: string, password: string) {
   }
 }
 
+//return errors for frontend once logout is better set up
 export async function logout() {
   try {
-    auth.signOut();
+    await auth.signOut();
+    destroyCookie(null, "currentUser");
+
+    //next section to immediately delete the cookies...sometimes works, sometimes not. redirect works and clears, though (from frontend at moment)
+    const cookies = parseCookies();
+    if (cookies.currentUser) {
+      document.cookie =
+        "currentUser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
     console.log("Logout success!");
-    console.log(auth)
   } catch (error) {
     console.error("Logout failed:", error);
   }
+  console.log(auth.currentUser);
 }
 
 export const handleAddressValidation = async (userAddress: any) => {
