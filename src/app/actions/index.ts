@@ -44,6 +44,17 @@ export async function login(email: string, password: string) {
     return error.message;
   }
 }
+
+export async function logout() {
+  try {
+    auth.signOut();
+    console.log("Logout success!");
+    console.log(auth)
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+}
+
 export const handleAddressValidation = async (userAddress: any) => {
   const cleanedAddress = userAddress.replace(/,/g, "");
   console.log(cleanedAddress);
