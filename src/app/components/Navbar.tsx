@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "@/context/AuthContext";
+import { logout } from "../actions";
 
 export default function Navbar() {
   const { state } = useCart();
@@ -14,11 +16,28 @@ export default function Navbar() {
     return total + item.quantity;
   }, 0);
 
+  const { setUser } = useAuth();
+ 
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      setUser && setUser(null);
+      // Clear local storage
+      localStorage.removeItem("userToken");
+      localStorage.removeItem("isAdmin");
+  
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <nav className="flex justify-evenly items-center">
       <div className="w-1/6">
         <Image src={logo} alt="logo" height={100} width={100} />
       </div>
+      <button onClick={handleLogout}>Logout</button>
       <ul className="flex w-5/6 justify-evenly items-end">
         {["home", "products", "work", "skills", "contact"].map((item) => (
           <li className="" key={`link-${item}`}>
