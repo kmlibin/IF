@@ -6,10 +6,13 @@ import React from "react";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { logout } from "../actions";
+import Cookies from 'js-cookie';
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const { state } = useCart();
   const { cart } = state;
+  const router = useRouter()
 
   //get total quantity of items in cart based on the quantity prop with each item
   const totalQuantity = cart.reduce((total, item) => {
@@ -23,10 +26,12 @@ export default function Navbar() {
     try {
       await logout()
       setUser && setUser(null);
-      // Clear local storage
+      // Clear local storage and cookies
+      Cookies.remove("currentUser")
       localStorage.removeItem("userToken");
       localStorage.removeItem("isAdmin");
-  
+      router.push("/products")
+  //redirect user somwehere
     } catch (e) {
       console.error(e);
     }
