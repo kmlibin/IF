@@ -19,8 +19,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {" "}
-     
         <body className="flex flex-col"> 
         <AuthProvider>
           <CartProvider>
@@ -28,8 +26,7 @@ export default function RootLayout({
             {children}
           </CartProvider>
           </AuthProvider>
-        </body>{" "}
-      
+        </body> 
     </html>
   );
 }
