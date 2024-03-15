@@ -3,8 +3,7 @@ import { Inter } from "next/font/google";
 import Navbar from "./components/Navbar";
 import "./globals.css";
 import CartProvider from "../context/CartContext";
-import AuthProvider from "@/context/AuthContext";
-
+import AuthProvider from "../context/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,14 +19,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="flex flex-col">
+      {" "}
+     
+        <body className="flex flex-col"> 
         <AuthProvider>
-        <CartProvider>
-          <Navbar />
-          {children}
-        </CartProvider>
-        </AuthProvider>
-      </body>
+          <CartProvider>
+            <Navbar />
+            {children}
+          </CartProvider>
+          </AuthProvider>
+        </body>{" "}
+      
     </html>
   );
 }
