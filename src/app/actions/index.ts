@@ -15,7 +15,7 @@ import { db } from "@/app/firebase/config";
 import { auth } from "@/app/firebase/config";
 import { CartItem } from "../types";
 import { fetchPricesFromFirebase } from "../firebase/queries";
-import { destroyCookie, parseCookies } from "nookies";
+
 
 export async function login(email: string, password: string) {
   try {
@@ -53,14 +53,6 @@ export async function login(email: string, password: string) {
 export async function logout() {
   try {
     await auth.signOut();
-    destroyCookie(null, "currentUser");
-
-    //next section to immediately delete the cookies...sometimes works, sometimes not. redirect works and clears, though (from frontend at moment)
-    const cookies = parseCookies();
-    if (cookies.currentUser) {
-      document.cookie =
-        "currentUser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    }
     console.log("Logout success!");
   } catch (error) {
     console.error("Logout failed:", error);
