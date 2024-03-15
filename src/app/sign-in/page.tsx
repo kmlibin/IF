@@ -4,22 +4,24 @@ import { login } from "../actions";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const {setUser} = useAuth()
+  const { user, setUser } = useAuth();
   const router = useRouter();
 
+  console.log(user); // Check if user is logged
+  console.log(setUser); // Check if setUser is defined
+  
   const handleSignIn = async () => {
     try {
-      const {token, admin} = await login(email, password);
+      const { token, admin } = await login(email, password);
       if (admin) {
-        localStorage.setItem("isAdmin", "true")
+        localStorage.setItem("isAdmin", "true");
       }
 
-      localStorage.setItem("userToken", token)
-      setUser({ token, isAdmin: admin });
+      localStorage.setItem("userToken", token);
+      setUser && setUser({ token, isAdmin: admin });
       setEmail("");
       setPassword("");
       router.push("/");
