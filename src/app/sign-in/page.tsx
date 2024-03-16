@@ -1,10 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { login } from "../actions";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Cookies from 'js-cookie'
-
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -12,19 +11,26 @@ const SignIn = () => {
   const { user, setUser } = useAuth();
   const router = useRouter();
 
-  //set cookie on frontend, destroy in server action. 
-  //need to show errors if unsucessful
   const handleSignIn = async () => {
     try {
-      const { token, admin } = await login(email, password);
-      if (admin) {
-        localStorage.setItem("isAdmin", "true");
-        Cookies.set("currentUser", "admin", { expires: 1 });
+      const res = await fetch("/api/login", {
+        method: "POST",
+        body: JSON.stringify({email, password}),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-      }
+      console.log(res)
+      // const { token, admin } = await login(email, password);
+      // if (admin) {
+      //   localStorage.setItem("isAdmin", "true");
+        // Cookies.set("currentUser", "admin", { expires: 1 });
 
-      localStorage.setItem("userToken", token);
-      setUser && setUser({ token, isAdmin: admin });
+      // }
+
+      // localStorage.setItem("userToken", token);
+      // setUser && setUser({ token, isAdmin: admin });
       setEmail("");
       setPassword("");
       router.push("/");
