@@ -6,16 +6,17 @@ import {
 } from "firebase/firestore/lite";
 import { db } from "@/app/firebase/config";
 import { auth } from "@/app/firebase/config";
-
+import {initializeAdminApp} from '../../firebase/firebaseAdmin';
 import { cookies } from "next/headers";
 import { setCookie } from "nookies";
 import nookies from 'nookies'
 import { NextRequest, NextResponse } from "next/server";
 import { NextApiResponse } from "next";
-
+import { getAuth } from "firebase-admin/auth";
 
 
 export async function POST(req: NextRequest, res: NextResponse) {
+  initializeAdminApp();
   const cookieStore = cookies()
     const body = await req.json()
         const { email, password } = body;
@@ -33,27 +34,26 @@ export async function POST(req: NextRequest, res: NextResponse) {
               const userData = userDoc.data();
               if (userData.isAdmin) {
                 admin = true;
-              }
-            }
-    
+                const customClaims = { admin: true };
+                //  custom token for the user
+                const customToken = await getAuth().createCustomToken(uid)
+                console.log(customToken)
+         
             // Store auth token and set cookies
             const token = await auth.currentUser.getIdToken();
-            const cookieOptions = {
-              maxAge: 60 * 60 * 24, // 1 day
-              sameSite: "strict",
-              httpOnly: true,
-              // secure: process.env.NODE_ENV === "production", // Ensures cookie is sent only over HTTPS in production
-          };
+            const cookieOptions = `token=${customToken}; Max-Age=86400; Path=/; Secure; HttpOnly; SameSite=Strict`;
 
             return new Response('Hello, Next.js!', {
               status: 200,
-              headers: { 'Set-Cookie': `token=${token}` },
+              headers: { 'Set-Cookie': cookieOptions },
             })
-
+     }
+            }
+    
           }
-        } catch (error) {
-          console.error("Login failed:");
-          return NextResponse.json({ error: "Login failed" });
+        } catch (err) {
+          console.error(err);
+          return NextResponse.json({ err});
         }
       } 
     
