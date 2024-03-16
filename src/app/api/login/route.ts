@@ -36,12 +36,12 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 admin = true;
                 const customClaims = { admin: true };
                 //  custom token for the user
-                const customToken = await getAuth().createCustomToken(uid)
-                console.log(customToken)
-         
+                // const customToken = await getAuth().createCustomToken(uid)
+                // console.log(customToken)
+                // const customToken = await getAuth().createCustomToken(uid, customClaims);
             // Store auth token and set cookies
             const token = await auth.currentUser.getIdToken();
-            const cookieOptions = `token=${customToken}; Max-Age=86400; Path=/; Secure; HttpOnly; SameSite=Strict`;
+            const cookieOptions = `token=${token}; Max-Age=86400; Path=/; Secure; HttpOnly; SameSite=Strict`;
 
             return new Response('Hello, Next.js!', {
               status: 200,
