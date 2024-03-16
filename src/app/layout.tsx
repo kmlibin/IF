@@ -19,14 +19,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-        <body className="flex flex-col"> 
+      <body className="flex flex-col">
         <AuthProvider>
           <CartProvider>
             <Navbar />
             {children}
           </CartProvider>
-          </AuthProvider>
-        </body> 
+        </AuthProvider>
+      </body>
     </html>
   );
 }
