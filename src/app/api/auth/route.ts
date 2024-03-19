@@ -1,64 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuth} from "firebase-admin/auth";
-import { signInWithCustomToken } from "firebase/auth";
-import { cookies } from "next/headers";
-import {auth} from '../../firebase/config'
-import {initializeAdminApp} from '../../firebase/firebaseAdmin';
+import { getAuth } from "firebase-admin/auth";
+import { initializeAdminApp } from "../../firebase/firebaseAdmin";
 
-export async function GET(req: NextRequest, res: NextResponse) { 
-  initializeAdminApp()
-  // console.log(`cookies: ${req.cookies}`)
-  // console.log(req.headers.getSetCookie())
-const cookies = req.cookies
+//this function authorizes a user to view certain pages based on firebase admin. on login, i set a token for that user and custom claims for that user
+//custcom claims are stored by their uid. token stored as a cookie, connects their session to their user profile. i get the cookie,
+//check that the cookie (token) is valid, then use that uid assoc with that token to see if there are any claims associated with the user.
+//i return true or false, which sends back to server action as 200 or 403
 
-// console.log(`cookies2 = ${cookies}`)
-  // console.log(cookieStore)
-  // const body = await req.json()
-  // console.log(req.cookies)
-const token = req.headers.getSetCookie()
-    console.log(`token = ${token}`)
- 
+
+//seems like whenver there is any error from firebase, it just defaults to the catch block, bypassing my errors.  hmm. 
+export async function GET(req: NextRequest, res: NextResponse) {
+  initializeAdminApp();
+
+  const token = req.headers.getSetCookie();
+  console.log(`token = ${token}`);
+
   try {
-    // console.log(body)
-    // get token
-    
-    // verify token on fb admin
-    if(token) {
+    if (token) {
+      //check that the token is valid (remember, token has uid and claims), then with the uid you can check the claims on the user uid. make sure admin is true
+      const authorized = await getAuth()
+        .verifyIdToken(token.toString())
+        .then((claims) => {
+          console.log(claims);
+          if (claims.admin === true) {
+            return true;
+          }
+          return false;
+        });
 
-    //  const sign = await signInWithCustomToken(auth, token.toString())
-    //  console.log(`sign = ${sign}`) 
-    
-    const authorized = await getAuth().verifyIdToken(token.toString()).then((claims) => {
- console.log(claims)
-       return "this is true"
-    }) 
+      console.log(`decodedToken=${authorized}`);
 
-    // const finalToken = await getAuth().getUser("FroWN7Em1zMl4EoZf6t3qrOb7vV2").then((userRecord) => {
-
-    //   if(userRecord) {
-    //     console.log(`RECORD: ${userRecord?.customClaims}`)
-    //   }
-     
-    //   return true
-
-    // })
-     
-   console.log(`decodedToken=${authorized}`)
-    
-
-    // Check if the decoded token contains the necessary claims (e.g., isAdmin)
-    if (authorized) {
-      console.log('has admin')
-      // User is authorized to access the protected route
-      return NextResponse.json({ error: 'success' }, { status: 200 })
-    } else {
-      console.log('no admin')
-      // User is not authorized; return an error response
-      return NextResponse.json({ error: 'failure' }, { status: 403 })
-    } }
+      //if user is authorized, send a 200 that SA and frontend uses to determine if user is authed
+      if (authorized === true) {
+        return NextResponse.json({ message: "success" }, { status: 200 });
+      } else {
+        return NextResponse.json({ error: "failure" }, { status: 403 });
+      }
+    }
   } catch (error) {
-    // Handle any errors that occur during token verification
+    // for errors that occur during token verification
     console.error("Error verifying JWT token:", error);
-    return NextResponse.json({ error: 'failure' }, { status: 500 })
+    return NextResponse.json({ error: "failure" }, { status: 500 });
   }
 }

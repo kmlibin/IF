@@ -16,28 +16,10 @@ import { auth } from "@/app/firebase/config";
 import { CartItem } from "../types";
 import { fetchPricesFromFirebase } from "../firebase/queries";
 import { cookies } from "next/headers";
-import { setCookie } from "nookies";
-import nookies from "nookies";
-import { getAuth } from "firebase-admin/auth";
-import { initializeAdminApp } from "../firebase/firebaseAdmin";
 
-// interface StoreTokenRequest {
-//   token: string;
-//   admin: string;
-// }
 
-// export async function storeToken(request: StoreTokenRequest) {
-//   const cookieStore = cookies()
-//   await cookieStore.set(null, 'fromGetInitialProps', request.token, {
-//     maxAge: 30 * 24 * 60 * 60,
-//     path: '/',
-//   })
-//   nookies.set(null, 'fromGetInitialProps2', request.admin, {
-//     maxAge: 30 * 24 * 60 * 60,
-//     path: '/',
-//   })
-// }
 
+//error handling!!
 export const authUser = async () => {
   let auth
   const cookieStore = cookies();
@@ -53,6 +35,7 @@ export const authUser = async () => {
       },
     });
     console.log(res.status);
+    console.log(res)
     if (res.status == 200) {
     
       return auth = true
@@ -64,6 +47,9 @@ export const authUser = async () => {
     console.log(err);
   }
 };
+
+//remove cookie
+//remove custom claims
 export async function logout() {
   try {
     await auth.signOut();
