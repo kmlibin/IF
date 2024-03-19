@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import { getAuth} from "firebase-admin/auth";
 import { signInWithCustomToken } from "firebase/auth";
 import { cookies } from "next/headers";
@@ -8,10 +7,11 @@ import {initializeAdminApp} from '../../firebase/firebaseAdmin';
 
 export async function GET(req: NextRequest, res: NextResponse) { 
   initializeAdminApp()
-  console.log(req.headers.getSetCookie())
+  // console.log(`cookies: ${req.cookies}`)
+  // console.log(req.headers.getSetCookie())
+const cookies = req.cookies
 
-
-
+// console.log(`cookies2 = ${cookies}`)
   // console.log(cookieStore)
   // const body = await req.json()
   // console.log(req.cookies)
@@ -26,14 +26,28 @@ const token = req.headers.getSetCookie()
     if(token) {
 
     //  const sign = await signInWithCustomToken(auth, token.toString())
-    //  console.log(`sign = ${sign}`)
-       const decodedToken = await getAuth().verifyIdToken(token.toString()); 
+    //  console.log(`sign = ${sign}`) 
+    
+    const authorized = await getAuth().verifyIdToken(token.toString()).then((claims) => {
+ console.log(claims)
+       return "this is true"
+    }) 
 
-   console.log(`decodedToken=${decodedToken}`)
+    // const finalToken = await getAuth().getUser("FroWN7Em1zMl4EoZf6t3qrOb7vV2").then((userRecord) => {
+
+    //   if(userRecord) {
+    //     console.log(`RECORD: ${userRecord?.customClaims}`)
+    //   }
+     
+    //   return true
+
+    // })
+     
+   console.log(`decodedToken=${authorized}`)
     
 
     // Check if the decoded token contains the necessary claims (e.g., isAdmin)
-    if (decodedToken) {
+    if (authorized) {
       console.log('has admin')
       // User is authorized to access the protected route
       return NextResponse.json({ error: 'success' }, { status: 200 })
