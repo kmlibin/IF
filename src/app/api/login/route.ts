@@ -1,62 +1,66 @@
-
 import { Auth, signInWithEmailAndPassword } from "firebase/auth";
-import {
-  getDoc,
-  doc,
-} from "firebase/firestore/lite";
+import { getDoc, doc } from "firebase/firestore/lite";
 import { db } from "@/app/firebase/config";
 import { auth } from "@/app/firebase/config";
-import {initializeAdminApp} from '../../firebase/firebaseAdmin';
+import { initializeAdminApp } from "../../firebase/firebaseAdmin";
 import { cookies } from "next/headers";
 import { setCookie } from "nookies";
-import nookies from 'nookies'
+import nookies from "nookies";
 import { NextRequest, NextResponse } from "next/server";
 import { NextApiResponse } from "next";
 import { getAuth } from "firebase-admin/auth";
 
-
 export async function POST(req: NextRequest, res: NextResponse) {
   initializeAdminApp();
-  const cookieStore = cookies()
-    const body = await req.json()
-        const { email, password } = body;
-    
-        try {
-          const response = await signInWithEmailAndPassword(auth, email, password);
-          let admin = false;
-    
-          // After successful login, get the user's information from the users collection
-          if (auth.currentUser) {
-            const uid = auth.currentUser.uid;
-            const userDoc = await getDoc(doc(db, "users", uid));
-    
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
-              if (userData.isAdmin) {
-                admin = true;
-                const customClaims = { admin: true };
-                //  custom token for the user
-                // const customToken = await getAuth().createCustomToken(uid)
-                // console.log(customToken)
-                // const customToken = await getAuth().createCustomToken(uid, customClaims);
-            // Store auth token and set cookies
-            const token = await auth.currentUser.getIdToken();
-            const cookieOptions = `token=${token}; Max-Age=86400; Path=/; Secure; HttpOnly; SameSite=Strict`;
+  const cookieStore = cookies();
+  const body = await req.json();
+  const { email, password } = body;
 
-            return new Response('Hello, Next.js!', {
-              status: 200,
-              headers: { 'Set-Cookie': cookieOptions },
-            })
-     }
-            }
-    
-          }
-        } catch (err) {
-          console.error(err);
-          return NextResponse.json({ err});
+  try {
+    const response = await signInWithEmailAndPassword(auth, email, password);
+    let admin = false;
+
+    // After successful login, get the user's information from the users collection
+    if (auth.currentUser) {
+      const uid = auth.currentUser.uid;
+      const userDoc = await getDoc(doc(db, "users", uid));
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.isAdmin) {
+          admin = true;
+          // const customClaims = { admin: true };
+          //  custom token for the user
+          // const customToken = await getAuth().createCustomToken(uid)
+          // console.log(customToken)
+          // const customToken = await getAuth().createCustomToken(
+          //   uid,
+          //   customClaims
+          // );
+          // console.log(`customToken = ${customToken}`);
+          const token = await auth.currentUser.getIdToken();
+          await getAuth()
+            .setCustomUserClaims(uid, { admin: true })
+            .then(() => {
+              console.log("custom claims set!");
+            });
+          // Store auth token and set cookies
+
+          const cookieOptions = `token=${token}; Max-Age=86400; Path=/; Secure; HttpOnly; SameSite=Strict`;
+
+          return new Response("Hello, Next.js!", {
+            status: 200,
+            headers: { "Set-Cookie": cookieOptions },
+          });
         }
-      } 
-    
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ err });
+  }
+}
+
 // interface StoreTokenRequest {
 //   token: string;
 //   admin: string;
@@ -73,7 +77,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
 //     path: '/',
 //   })
 // }
-
 
 // export async function login(email: string, password: string) {
 //   try {
