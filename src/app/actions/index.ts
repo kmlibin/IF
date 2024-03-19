@@ -15,41 +15,55 @@ import { db } from "@/app/firebase/config";
 import { auth } from "@/app/firebase/config";
 import { CartItem } from "../types";
 import { fetchPricesFromFirebase } from "../firebase/queries";
+import { cookies } from "next/headers";
+import { setCookie } from "nookies";
+import nookies from "nookies";
+import { getAuth } from "firebase-admin/auth";
+import { initializeAdminApp } from "../firebase/firebaseAdmin";
 
+// interface StoreTokenRequest {
+//   token: string;
+//   admin: string;
+// }
 
-export async function login(email: string, password: string) {
+// export async function storeToken(request: StoreTokenRequest) {
+//   const cookieStore = cookies()
+//   await cookieStore.set(null, 'fromGetInitialProps', request.token, {
+//     maxAge: 30 * 24 * 60 * 60,
+//     path: '/',
+//   })
+//   nookies.set(null, 'fromGetInitialProps2', request.admin, {
+//     maxAge: 30 * 24 * 60 * 60,
+//     path: '/',
+//   })
+// }
+
+export const authUser = async () => {
+  let auth
+  const cookieStore = cookies();
+  const token = cookieStore.get("token");
+
   try {
-    const response = await signInWithEmailAndPassword(auth, email, password);
-    let admin;
-    //after successful login, get the users information from the users collection, stored by uid
-    console.log(`currentUser : ${auth.currentUser}`);
-    if (auth.currentUser) {
-      const uid = auth.currentUser.uid;
-      const userDoc = await getDoc(doc(db, "users", uid));
-
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-
-        //set admin to true so can return to frontend
-        if (userData.isAdmin) {
-          admin = true;
-        }
-      }
-
-      // store auth token and store it in local storage
-      const token = await auth.currentUser.getIdToken();
-      // Cookies.set("userToken", token, { expires: 1 });
-
-      return { token, admin };
+    const res = await fetch("http://localhost:3000/api/auth", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        // Include the cookie in the request headers
+        "Set-Cookie": `${token?.value}`,
+      },
+    });
+    console.log(res.status);
+    if (res.status == 200) {
+    
+      return auth = true
+      // console.log(`auth = ${auth}`)
+    } else {
+      return auth = false
     }
-    console.log("Login success!");
-  } catch (error: any) {
-    console.log("Login failed:", error.message);
-    return error.message;
+  } catch (err) {
+    console.log(err);
   }
-}
-
-//return errors for frontend once logout is better set up
+};
 export async function logout() {
   try {
     await auth.signOut();
@@ -261,3 +275,36 @@ export async function payOrder(
     };
   }
 }
+
+// import { NextResponse } from "next/server";
+// import type { NextRequest } from "next/server";
+// import { getAuth } from "firebase-admin/auth";
+// import { initializeAdminApp } from "./app/firebase/firebaseAdmin";
+
+// // This function can be marked `async` if using `await` inside
+// export async function middleware(request: NextRequest) {
+//   initializeAdminApp();
+
+//   const token = request.cookies.get("token");
+//   const tokenValue = token?.value;
+//   console.log(tokenValue);
+
+//   if (tokenValue) {
+//     try {
+//       await getAuth()
+//         .verifyIdToken(token.toString())
+//         .then((claims) => {
+//           if (claims.admin === true) {
+//             return true
+//           }
+//         });
+//     } catch (error) {
+//       return NextResponse.redirect(new URL("/sign-in", request.url));
+//     }
+//   }
+// }
+
+// // See "Matching Paths" below to learn more
+// export const config = {
+//   matcher: "/admin",
+// };
