@@ -18,8 +18,6 @@ import { fetchPricesFromFirebase } from "../firebase/queries";
 import { cookies } from "next/headers";
 
 
-
-//error handling!!
 export const authUser = async () => {
   let auth
   const cookieStore = cookies();
@@ -34,17 +32,14 @@ export const authUser = async () => {
         "Set-Cookie": `${token?.value}`,
       },
     });
-    console.log(res.status);
-    console.log(res)
+const responseData = await res.json();
     if (res.status == 200) {
-    
-      return auth = true
-      // console.log(`auth = ${auth}`)
+      return {auth: true, message: responseData.message}
     } else {
-      return auth = false
+      return {auth: false, error: responseData.error}
     }
   } catch (err) {
-    console.log(err);
+    return {auth: false, error: "Internal Service Error"}
   }
 };
 
