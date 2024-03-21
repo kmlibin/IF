@@ -3,7 +3,6 @@ import { getDoc, doc } from "firebase/firestore/lite";
 import { db } from "@/app/firebase/config";
 import { auth } from "@/app/firebase/config";
 import { initializeAdminApp } from "../../firebase/firebaseAdmin";
-
 import { NextRequest, NextResponse } from "next/server";
 
 import { getAuth } from "firebase-admin/auth";
@@ -15,11 +14,10 @@ export async function POST(req: NextRequest, res: NextResponse) {
   const body = await req.json();
   const { email, password } = body;
 
-  //maybe put signinwith email and pass in its own try catch...? is that a thing?
+  //maybe put signinwith email and pass in its own try catch...? is that a
   try {
-
     //seems to always trip the catch block if credentials don't work...
-    await signInWithEmailAndPassword(auth, email, password);
+    const signin = await signInWithEmailAndPassword(auth, email, password);
 
     // after successful login, get the user's uid and use that to look them up in user collection
     if (auth.currentUser) {
@@ -47,19 +45,15 @@ export async function POST(req: NextRequest, res: NextResponse) {
           });
         }
       }
-    } else {
-      console.log('this was tripped')
-      return Response.json(
-        { error: "Please provide valid credentials" },
-        { status: 401 }
-      );
+    } 
+
+  } catch (err:any) {
+    if(err.code === "auth/invalid-credential") {
+      //I'd had this error a few ways in the try block, but the error firebase throws goes right to the catch block. i saved signinwithemail/pass to a variable,
+      //but i couldn't even console log the variable if the request wasn't successful, it just immediately threw an error. So, that's why I'm
+      //handling the invalid credentials from the catch block.
+      return NextResponse.json("Please enter valid credentials", { status:403 })
     }
-  } catch (err) {
-    console.log(err)
-    console.log('the final block was tripped')
-    return Response.json(
-      { error: "Internal Error" },
-      { status: 500 }
-    );
+    return NextResponse.json("Internal Server Error", { status: 500 })
   }
 }
