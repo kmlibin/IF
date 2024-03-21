@@ -77,7 +77,7 @@ export const PayPal = ({ finalTotal, contactInfo, cart }: PayPalProps) => {
                   dispatch({
                     type: "CLEAR_INFO",
                   });
-                  router.push(`/orders/${response.orderId}`)
+                  router.push(`/confirmOrder/${response.orderId}`)
                 } else {
                   console.error("Payment failed:", response.error);
                 }

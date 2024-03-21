@@ -3,7 +3,7 @@ import React from 'react'
 
 interface OrderPageProps {
     params: {
-      id: string;
+      confirmOrderId: string;
     };
   }
 
@@ -11,7 +11,7 @@ const ConfirmOrderPage = (props: OrderPageProps) => {
     const { params } = props;
     console.log(params)
   return (
-    <div>confirm order page</div>
+    <div>confirmorder id page</div>
   )
 }
 
