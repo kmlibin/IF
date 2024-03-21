@@ -7,6 +7,8 @@ interface Product {
   type: string;
   price: number;
 }
+
+
 //need to put these in try/catches
 //run these from server components!
 export async function getProducts() {
@@ -67,4 +69,16 @@ export async function fetchPricesFromFirebase(cart: CartItem[]) {
   } catch (err) {
     throw new Error ("Error fetching prices from database");
   }
+}
+
+export async function getOrders() {
+  const ordersCol = collection(db, "orders");
+  const ordersSnapshot = await getDocs(ordersCol);
+  const ordersList: { id: string; data: any }[] =
+    ordersSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      data: doc.data(),
+    }));
+  console.log(ordersList);
+  return ordersList;
 }
