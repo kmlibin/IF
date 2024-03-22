@@ -87,6 +87,7 @@ const handleActiveChange = () => {
 const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
   e.preventDefault();
 //   console.log("Images:", images);
+//get productId to pass the product can be edited in the db
 const productId = product.id
   //if successful, clear formstate, show error or success
   try {

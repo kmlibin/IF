@@ -54,9 +54,33 @@ const AddProductForm: React.FC = () => {
   
     // Reset errors
     setImagesError(null);
+    console.log("Selected files:", filesArray);
   };
 
-
+  //must keep in client? in server, it doesn't like that i pass back the urls for some reason, says it doesn't like [File]
+const uploadImage = async (image: File): Promise<string> => {
+    try {
+      console.log("Uploading image:", image);
+      //create image name
+      const imageName = `${Date.now()}-${image.name}`;
+      console.log("Image name:", imageName);
+      //referene to the location whree image will be stored.
+      const imageRef = ref(storage, `images/${imageName}`);
+      console.log("Image reference:", imageRef);
+  
+      // uploads the file to the place we told it to go
+      await uploadBytes(imageRef, image);
+  
+      //after it uploads, we need to get the url so we can store it with the associated product in firestore
+      const imageUrl = await getDownloadURL(imageRef);
+      console.log("Image URL:", imageUrl);
+  
+      return imageUrl;
+    } catch (error) {
+      throw new Error("Error uploading images");
+    }
+  };
+console.log(images)
   //errors for this
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -68,6 +92,9 @@ const AddProductForm: React.FC = () => {
         const imageUrls = await Promise.all(
           images.map((image: any) => uploadImage(image))
         );
+
+        console.log("Uploaded image URLs:", imageUrls);
+
         //create object that has the formdata and image urls
         const productData = { ...formData, images: imageUrls };
 
@@ -122,7 +149,7 @@ const AddProductForm: React.FC = () => {
             type="number"
             id="price"
             name="price"
-            value={Number(formData.price)}
+            value={formData.price}
             onChange={handleChange}
             className="w-full border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
             required
@@ -153,7 +180,7 @@ const AddProductForm: React.FC = () => {
             type="number"
             id="quantity"
             name="quantity"
-            value={Number(formData.quantity)}
+            value={formData.quantity}
             onChange={handleChange}
             className="w-full border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
             required
