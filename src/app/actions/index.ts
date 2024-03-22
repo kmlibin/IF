@@ -11,6 +11,7 @@ import {
   getDoc,
   updateDoc,
   doc,
+  deleteDoc,
 } from "firebase/firestore/lite";
 import { db } from "@/app/firebase/config";
 import { auth } from "@/app/firebase/config";
@@ -258,10 +259,10 @@ export async function payOrder(
   }
 }
 
-
 //revalidate paths that show products since there is now a new product
 export const createProduct = async (formData: any) => {
-  const { name, quantity, price, keywords, description, type, images } = formData;
+  const { name, quantity, price, keywords, description, type, images } =
+    formData;
   try {
     const newProduct = await addDoc(collection(db, "products"), {
       name,
@@ -274,46 +275,67 @@ export const createProduct = async (formData: any) => {
       isActive: true,
     });
 
-    if(newProduct.id) {
-      console.log("added product successfully")
-      return ({error: false, message : "successfully added product to database"})
-    }else {
-      return ({error: true, message: "error adding product to database, try again later" })
+    if (newProduct.id) {
+      console.log("added product successfully");
+      return {
+        error: false,
+        message: "successfully added product to database",
+      };
+    } else {
+      return {
+        error: true,
+        message: "error adding product to database, try again later",
+      };
     }
   } catch (error: any) {
-       // figure out fb specific errors
-       if (error.code === "permission-denied") {
-        return { error: true, message: "Permission denied. Please try again later." };
-      }
-    return ({error: true, message: "error adding product to database, try again later" })
+    // figure out fb specific errors
+    if (error.code === "permission-denied") {
+      return {
+        error: true,
+        message: "Permission denied. Please try again later.",
+      };
+    }
+    return {
+      error: true,
+      message: "error adding product to database, try again later",
+    };
   }
 
   //revalidate paths that show products
 };
 
 export const uploadImage = async (image: File): Promise<string> => {
-
   try {
-      console.log("Uploading image:", image);
+    console.log("Uploading image:", image);
     //create image name
     const imageName = `${Date.now()}-${image.name}`;
-      
-    //referene to the location whree image will be stored. 
-    const imageRef = ref(storage, `images/${imageName}`);
-    console.log(imageRef)
 
-  // uploads the file to the place we told it to go
-  await uploadBytes(imageRef, image);
-  
-  //after it uploads, we need to get the url so we can store it with the associated product in firestore
-  const imageUrl = await getDownloadURL(imageRef);
-  
-  return imageUrl;
+    //referene to the location whree image will be stored.
+    const imageRef = ref(storage, `images/${imageName}`);
+    console.log(imageRef);
+
+    // uploads the file to the place we told it to go
+    await uploadBytes(imageRef, image);
+
+    //after it uploads, we need to get the url so we can store it with the associated product in firestore
+    const imageUrl = await getDownloadURL(imageRef);
+
+    return imageUrl;
   } catch (error) {
     throw new Error("Error uploading images");
   }
 };
 
+export const deleteProduct = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, "products", id));
+    return "Product Deleted Sucessfully";
+  } catch (error: any) {
+    return error.message;
+  }
+
+  //revalidate paths that showed the product.../products /admin
+};
 // import { NextResponse } from "next/server";
 // import type { NextRequest } from "next/server";
 // import { getAuth } from "firebase-admin/auth";
