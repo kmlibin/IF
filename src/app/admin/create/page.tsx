@@ -2,6 +2,7 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { createProduct } from "@/app/actions";
 import { storage } from "@/app/firebase/config";
+import { uploadImage } from "@/app/actions";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 interface Product {
   images: string[];
@@ -55,29 +56,6 @@ const AddProductForm: React.FC = () => {
     setImagesError(null);
   };
 
-  //send error for if file upload files
-  const uploadImage = async (image: File): Promise<string> => {
-    try {
-        console.log("Uploading image:", image);
-      //create image name
-      const imageName = `${Date.now()}-${image.name}`;
-        
-      //referene to the location whree image will be stored. 
-      const imageRef = ref(storage, `images/${imageName}`);
-      console.log(imageRef)
-
-    // uploads the file to the place we told it to go
-    await uploadBytes(imageRef, image);
-    
-    //after it uploads, we need to get the url so we can store it with the associated product in firestore
-    const imageUrl = await getDownloadURL(imageRef);
-    
-    return imageUrl;
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      throw error;
-    }
-  };
 
   //errors for this
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -95,6 +73,7 @@ const AddProductForm: React.FC = () => {
 
         
         const { error, message } = await createProduct(productData);
+        //set error/message in state
     
     } catch (error) {
       console.log("error adding product");

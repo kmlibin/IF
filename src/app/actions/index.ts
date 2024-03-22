@@ -1,6 +1,7 @@
 "use server";
 import client from "../utils/paypal/client";
-import { Auth, signInWithEmailAndPassword } from "firebase/auth";
+import { storage } from "@/app/firebase/config";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { revalidatePath } from "next/cache";
 import paypal from "@paypal/checkout-server-sdk";
 
@@ -17,9 +18,8 @@ import { CartItem } from "../types";
 import { fetchPricesFromFirebase } from "../firebase/queries";
 import { cookies } from "next/headers";
 
-
 export const authUser = async () => {
-  let auth
+  let auth;
   const cookieStore = cookies();
   const token = cookieStore.get("token");
 
@@ -32,14 +32,14 @@ export const authUser = async () => {
         "Set-Cookie": `${token?.value}`,
       },
     });
-const responseData = await res.json();
+    const responseData = await res.json();
     if (res.status == 200) {
-      return {auth: true, message: responseData.message}
+      return { auth: true, message: responseData.message };
     } else {
-      return {auth: false, error: responseData.error}
+      return { auth: false, error: responseData.error };
     }
   } catch (err) {
-    return {auth: false, error: "Internal Service Error"}
+    return { auth: false, error: "Internal Service Error" };
   }
 };
 
@@ -194,6 +194,7 @@ export async function payOrder(
           "Error with payment. Please try again later or contact email@email to complete transaction",
       };
     }
+    //send emails here? like, what if it's paid, but doesn't get posted to firebase? i could see the case for having it in create order function
     //put quantity check in its own function?
     //ONLY send to firebase if the response is completed
     if (response.result && response.result.status == "COMPLETED") {
@@ -256,6 +257,62 @@ export async function payOrder(
     };
   }
 }
+
+
+//revalidate paths that show products since there is now a new product
+export const createProduct = async (formData: any) => {
+  const { name, quantity, price, keywords, description, type, images } = formData;
+  try {
+    const newProduct = await addDoc(collection(db, "products"), {
+      name,
+      description,
+      type,
+      quantity,
+      price,
+      keywords,
+      images,
+      isActive: true,
+    });
+
+    if(newProduct.id) {
+      console.log("added product successfully")
+      return ({error: false, message : "successfully added product to database"})
+    }else {
+      return ({error: true, message: "error adding product to database, try again later" })
+    }
+  } catch (error: any) {
+       // figure out fb specific errors
+       if (error.code === "permission-denied") {
+        return { error: true, message: "Permission denied. Please try again later." };
+      }
+    return ({error: true, message: "error adding product to database, try again later" })
+  }
+
+  //revalidate paths that show products
+};
+
+export const uploadImage = async (image: File): Promise<string> => {
+
+  try {
+      console.log("Uploading image:", image);
+    //create image name
+    const imageName = `${Date.now()}-${image.name}`;
+      
+    //referene to the location whree image will be stored. 
+    const imageRef = ref(storage, `images/${imageName}`);
+    console.log(imageRef)
+
+  // uploads the file to the place we told it to go
+  await uploadBytes(imageRef, image);
+  
+  //after it uploads, we need to get the url so we can store it with the associated product in firestore
+  const imageUrl = await getDownloadURL(imageRef);
+  
+  return imageUrl;
+  } catch (error) {
+    throw new Error("Error uploading images");
+  }
+};
 
 // import { NextResponse } from "next/server";
 // import type { NextRequest } from "next/server";
