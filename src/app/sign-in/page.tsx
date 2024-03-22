@@ -1,31 +1,29 @@
 "use client";
 import { useState, useEffect } from "react";
-import { login } from "../actions";
+
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import Cookies from 'js-cookie'
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { user, setUser } = useAuth();
+
   const router = useRouter();
 
   const handleSignIn = async () => {
     try {
       const res = await fetch("/api/login", {
         method: "POST",
-        body: JSON.stringify({email, password}),
+        body: JSON.stringify({ email, password }),
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      console.log(res)
+      console.log(res);
       // const { token, admin } = await login(email, password);
       // if (admin) {
       //   localStorage.setItem("isAdmin", "true");
-        // Cookies.set("currentUser", "admin", { expires: 1 });
+      // Cookies.set("currentUser", "admin", { expires: 1 });
 
       // }
 
@@ -33,9 +31,14 @@ const SignIn = () => {
       // setUser && setUser({ token, isAdmin: admin });
       setEmail("");
       setPassword("");
-      router.push("/");
-    } catch (e) {
-      console.error(e);
+
+      if (res.ok) {
+        router.push("/");
+      } else {
+        console.log(res.status)
+      }
+    } catch (error) {
+      console.log(`error ${error}`);
     }
   };
 

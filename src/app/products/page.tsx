@@ -13,12 +13,12 @@ interface Product {
 export default async function ProductList() {
   const products = await getProducts();
 
-  // console.log(products);
+  console.log(products);
   return (
     <div className="flex w-full gap-4 justify-center items-center min-h-[70vh]">
       {products &&
         products.map((item: { id: string; data: Product }) => (
-          <div key={item.data.name} className="w-1/4 flex flex-col">
+          <div key={item.id} className="w-1/4 flex flex-col">
             <Image src={quilt} alt="quilt" height={300} width={300} />
             <Link href={`/products/${item.id}`}>
               <div>{item.data.name}</div>

@@ -122,7 +122,7 @@ const AddProductForm: React.FC = () => {
             type="number"
             id="price"
             name="price"
-            value={formData.price}
+            value={Number(formData.price)}
             onChange={handleChange}
             className="w-full border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
             required
@@ -153,7 +153,7 @@ const AddProductForm: React.FC = () => {
             type="number"
             id="quantity"
             name="quantity"
-            value={formData.quantity}
+            value={Number(formData.quantity)}
             onChange={handleChange}
             className="w-full border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
             required

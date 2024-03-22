@@ -3,12 +3,21 @@ import { db } from "@/app/firebase/config";
 import { CartItem } from "@/app/types";
 
 interface Product {
-  name: string;
-  type: string;
-  price: number;
+  data: {
+    images?: string[];
+    name: string;
+    quantity: number | string;
+    price: number | string;
+    keywords?: string[];
+    type: string;
+    isActive: boolean;
+    description: string;
+  };
 }
 
+
 interface Order {
+  id: string,
   CustomerAddress: string,
   CustomerEmail: string,
   CustomerName: string,
@@ -35,10 +44,10 @@ interface Order {
 export async function getProducts() {
   const productCol = collection(db, "products");
   const productSnapshot = await getDocs(productCol);
-  const productsList: { id: string; data: Product }[] =
+  const productsList: { id: string; data: any }[] =
     productSnapshot.docs.map((doc) => ({
       id: doc.id,
-      data: doc.data() as Product,
+      data: doc.data()
     }));
   // console.log(productsList);
   return productsList;
@@ -100,7 +109,7 @@ export async function getOrders() {
       id: doc.id,
       data: doc.data(),
     }));
-  console.log(ordersList);
+  // console.log(ordersList);
   return ordersList;
 }
 

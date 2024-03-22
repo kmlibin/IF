@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
   initializeAdminApp();
 
   const token = req.headers.getSetCookie();
-  console.log(`token = ${token}`);
+  // console.log(`token = ${token}`);
 
   try {
     if (token) {
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       const authorized = await getAuth()
         .verifyIdToken(token.toString())
         .then((claims) => {
-          console.log(claims);
+          // console.log(claims);
           if (claims.admin === true) {
             return true;
           }
