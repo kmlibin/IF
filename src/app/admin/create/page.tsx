@@ -2,7 +2,6 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { createProduct } from "@/app/actions";
 import { storage } from "@/app/firebase/config";
-import { uploadImage } from "@/app/actions";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 interface Product {
   images: string[];
