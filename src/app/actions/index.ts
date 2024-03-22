@@ -336,6 +336,35 @@ export const deleteProduct = async (id: string) => {
 
   //revalidate paths that showed the product.../products /admin
 };
+
+export const editProduct = async (productId: string, formData: any) => {
+  const {
+    name,
+    description,
+    price,
+    type,
+    quantity,
+    keywords,
+    images,
+    isActive,
+  } = formData;
+  const productRef = doc(db, "products", productId);
+  if (productRef) {
+    await updateDoc(productRef, {
+      name,
+      description,
+      price,
+      type,
+      quantity,
+      keywords,
+      images,
+      isActive,
+    });
+
+    return "Product Edited Successfully"
+  }
+  return "Unable to Edit Product"
+};
 // import { NextResponse } from "next/server";
 // import type { NextRequest } from "next/server";
 // import { getAuth } from "firebase-admin/auth";
