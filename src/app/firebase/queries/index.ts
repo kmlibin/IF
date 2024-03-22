@@ -8,6 +8,27 @@ interface Product {
   price: number;
 }
 
+interface Order {
+  CustomerAddress: string,
+  CustomerEmail: string,
+  CustomerName: string,
+  PayPalemail: string,
+  PayPalPaymentId: string,
+  hasShipped: boolean,
+  orderTotal: number,
+  paidAt: string,
+  shipMethod: string,
+  tracking: string,
+  products: {
+    data: {
+      name: string,
+      price: number,
+      type: string
+    }
+    quantity: number
+  }[]
+}
+
 
 //need to put these in try/catches
 //run these from server components!
@@ -81,4 +102,20 @@ export async function getOrders() {
     }));
   console.log(ordersList);
   return ordersList;
+}
+
+
+export async function getOrderById(
+  orderId: string
+): Promise<{ data: Order | undefined }> {
+  // console.log(`in call ${id}`);
+  const orderRef = doc(db, "orders", orderId);
+  const orderSnapshot = await getDoc(orderRef);
+  if (orderSnapshot) {
+    const orderData = orderSnapshot.data() as Order;
+    // console.log(productData);
+    return { data: orderData };
+  }
+
+  return { data: undefined };
 }
