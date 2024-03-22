@@ -304,27 +304,6 @@ export const createProduct = async (formData: any) => {
   //revalidate paths that show products
 };
 
-export const uploadImage = async (image: File): Promise<string> => {
-  try {
-    console.log("Uploading image:", image);
-    //create image name
-    const imageName = `${Date.now()}-${image.name}`;
-
-    //referene to the location whree image will be stored.
-    const imageRef = ref(storage, `images/${imageName}`);
-    console.log(imageRef);
-
-    // uploads the file to the place we told it to go
-    await uploadBytes(imageRef, image);
-
-    //after it uploads, we need to get the url so we can store it with the associated product in firestore
-    const imageUrl = await getDownloadURL(imageRef);
-
-    return imageUrl;
-  } catch (error) {
-    throw new Error("Error uploading images");
-  }
-};
 
 export const deleteProduct = async (id: string) => {
   try {
@@ -360,7 +339,7 @@ export const editProduct = async (productId: string, formData: any) => {
       images,
       isActive,
     });
-
+//revalidate paths
     return "Product Edited Successfully"
   }
   return "Unable to Edit Product"
