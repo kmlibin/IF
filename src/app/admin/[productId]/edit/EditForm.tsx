@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { createProduct, editProduct } from "@/app/actions";
+import ImageUploader from "../../components/ImageUploader";
 
-import { uploadImage } from "@/app/actions";
-
+import { uploadImage } from "../../create/page";
 
 interface Product {
     id: string;
@@ -58,16 +58,6 @@ const handleKeywordsChange = (e: ChangeEvent<HTMLInputElement>) => {
   }));
 };
 
-const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-  const selectedFiles = e.target.files;
-  if (!selectedFiles) return;
-
-  const filesArray = Array.from(selectedFiles);
-  setImages(filesArray);
-
-  // Reset errors
-  setImagesError(null);
-};
 
 const handleActiveChange = () => {
     setFormData((prevFormData: any) => ({
@@ -109,11 +99,18 @@ const productId = product.id
   }
 };
 
-console.log(formData)
+console.log(formData.images)
 return (
   <div className="w-2/3 p-8 mt-10 rounded-lg shadow-md bg-purple-700">
     <h2 className="text-2xl font-bold mb-4">Edit Product</h2>
     <form onSubmit={handleSubmit} className="w-full">
+    <div className="mb-4">
+                    <ImageUploader
+                        images={formData.images}
+                        setImages = {setImages}
+                    />
+                    {imagesError && <p className="text-red-500">{imagesError}</p>}
+                </div>
       <div className="mb-4">
         <label htmlFor="name" className="block text-sm font-semibold mb-2">
           Name
@@ -206,22 +203,7 @@ return (
           required
         />
       </div>
-      <div className="mb-4">
-        <label htmlFor="image" className="block text-sm font-semibold mb-2">
-          Images (up to 5)
-        </label>
-        <input
-          type="file"
-          id="image"
-          name="image"
-          multiple
-          accept="image/*"
-          onChange={handleFileChange}
-          className="border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
-      
-        />
-        {imagesError && <p className="text-red-500">{imagesError}</p>}
-      </div>
+
       <div className="mb-4">
           <label htmlFor="isActive" className="block text-sm font-semibold mb-2">
             Status

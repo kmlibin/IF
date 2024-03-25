@@ -1,8 +1,9 @@
 "use client";
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { createProduct } from "@/app/actions";
 import { storage } from "@/app/firebase/config";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import ImageUploader from "../components/ImageUploader";
 interface Product {
   images: string[];
   name: string;
@@ -13,9 +14,33 @@ interface Product {
   keywords: string[];
 }
 
+//must keep in client? in server, it doesn't like that i pass back the urls for some reason, says it doesn't like [File]. right now in two, put in a diff file and clean up
+export const uploadImage = async (image: File): Promise<string> => {
+  try {
+    console.log("Uploading image:", image);
+    //create image name
+    const imageName = `${Date.now()}-${image.name}`;
+    console.log("Image name:", imageName);
+    //referene to the location whree image will be stored.
+    const imageRef = ref(storage, `images/${imageName}`);
+    console.log("Image reference:", imageRef);
+
+    // uploads the file to the place we told it to go
+    await uploadBytes(imageRef, image);
+
+    //after it uploads, we need to get the url so we can store it with the associated product in firestore
+    const imageUrl = await getDownloadURL(imageRef);
+    console.log("Image URL:", imageUrl);
+
+    return imageUrl;
+  } catch (error) {
+    throw new Error("Error uploading images");
+  }
+};
 const AddProductForm: React.FC = () => {
   const [images, setImages] = useState<File[]>([]);
   const [imagesError, setImagesError] = useState<string | null>(null);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [formData, setFormData] = useState<Product>({
     images: [],
     name: "",
@@ -25,6 +50,12 @@ const AddProductForm: React.FC = () => {
     quantity: 0,
     keywords: [],
   });
+
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
+    };
+  }, [imagePreviews]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -44,63 +75,26 @@ const AddProductForm: React.FC = () => {
     }));
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = e.target.files;
-    if (!selectedFiles) return;
-  
-    const filesArray = Array.from(selectedFiles);
-    setImages(filesArray);
-  
-    // Reset errors
-    setImagesError(null);
-    console.log("Selected files:", filesArray);
-  };
-
-  //must keep in client? in server, it doesn't like that i pass back the urls for some reason, says it doesn't like [File]
-const uploadImage = async (image: File): Promise<string> => {
-    try {
-      console.log("Uploading image:", image);
-      //create image name
-      const imageName = `${Date.now()}-${image.name}`;
-      console.log("Image name:", imageName);
-      //referene to the location whree image will be stored.
-      const imageRef = ref(storage, `images/${imageName}`);
-      console.log("Image reference:", imageRef);
-  
-      // uploads the file to the place we told it to go
-      await uploadBytes(imageRef, image);
-  
-      //after it uploads, we need to get the url so we can store it with the associated product in firestore
-      const imageUrl = await getDownloadURL(imageRef);
-      console.log("Image URL:", imageUrl);
-  
-      return imageUrl;
-    } catch (error) {
-      throw new Error("Error uploading images");
-    }
-  };
-console.log(images)
+  console.log(images);
   //errors for this
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Images:", images);
     //if successful, clear formstate, show error or success
     try {
-      
-        //get the image url for each image provided by user
-        const imageUrls = await Promise.all(
-          images.map((image: any) => uploadImage(image))
-        );
+      //get the image url for each image provided by user
+      const imageUrls = await Promise.all(
+        images.map((image: any) => uploadImage(image))
+      );
 
-        console.log("Uploaded image URLs:", imageUrls);
+      console.log("Uploaded image URLs:", imageUrls);
 
-        //create object that has the formdata and image urls
-        const productData = { ...formData, images: imageUrls };
+      //create object that has the formdata and image urls
+      const productData = { ...formData, images: imageUrls };
 
-        
-        const { error, message } = await createProduct(productData);
-        //set error/message in state
-    
+      const { error, message } = await createProduct(productData);
+      //set error/message in state
+      console.log('created!')
     } catch (error) {
       console.log("error adding product");
     }
@@ -110,6 +104,12 @@ console.log(images)
     <div className="w-2/3 p-8 mt-10 rounded-lg shadow-md bg-slate-500">
       <h2 className="text-2xl font-bold mb-4">Add Product</h2>
       <form onSubmit={handleSubmit} className="w-full">
+        <div className="flex">
+          <ImageUploader
+          setImages={setImages}
+          />
+          {imagesError && <p className="text-red-500">{imagesError}</p>}
+        </div>
         <div className="mb-4">
           <label htmlFor="name" className="block text-sm font-semibold mb-2">
             Name
@@ -201,22 +201,6 @@ console.log(images)
             className="w-full border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
             required
           />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="image" className="block text-sm font-semibold mb-2">
-            Images (up to 5)
-          </label>
-          <input
-            type="file"
-            id="image"
-            name="image"
-            multiple
-            accept="image/*"
-            onChange={handleFileChange}
-            className="border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500"
-            required
-          />
-          {imagesError && <p className="text-red-500">{imagesError}</p>}
         </div>
         <button
           type="submit"
